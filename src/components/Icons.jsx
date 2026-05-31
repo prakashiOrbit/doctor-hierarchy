@@ -86,13 +86,6 @@ export const IconBell = (p) => (
   </I>
 );
 
-export const IconSearch = (p) => (
-  <I {...p}>
-    <Circle cx="11" cy="11" r="7" />
-    <Path d="M21 21l-4.3-4.3" />
-  </I>
-);
-
 export const IconAlert = (p) => (
   <I {...p}>
     <Path d="M12 3l10 18H2L12 3z" />
@@ -146,9 +139,24 @@ export const IconChevron = (p) => (
   </I>
 );
 
+export const IconLogout = (p) => (
+  <I {...p}>
+    <Path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+    <Path d="M16 17l5-5-5-5" />
+    <Path d="M21 12H9" />
+  </I>
+);
+
 export const IconClose = (p) => (
   <I {...p}>
     <Path d="M18 6L6 18M6 6l12 12" />
+  </I>
+);
+
+export const IconClock = (p) => (
+  <I {...p}>
+    <Circle cx="12" cy="12" r="10" />
+    <Path d="M12 6v6l4 2" />
   </I>
 );
 

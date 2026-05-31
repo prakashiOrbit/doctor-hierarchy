@@ -45,84 +45,90 @@ export const LoginScreen = ({ onSignIn, onForgot }) => {
       style={styles.container}
     >
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        <View style={styles.header}>
-          <DocLogo size={34} sub={false} />
-        </View>
-
-        <View style={styles.welcomeSection}>
-          <Text style={styles.title}>Welcome, Doctor</Text>
-          <Text style={styles.subtitle}>Sign in to your clinical workspace.</Text>
-        </View>
-
-        <View style={styles.form}>
-          <Field label="Username">
-            <TextInput
-              value={user}
-              onChange={setUser}
-              leading={<IconStethoscope size={16} color={T.textDim} />}
-              placeholder="your.username"
-            />
-          </Field>
-
-          <Field label="Password">
-            <TextInput
-              value={pw}
-              onChange={setPw}
-              secureTextEntry={!showPw}
-              leading={<IconLock size={16} color={T.textDim} />}
-              placeholder="password"
-              trailing={
-                <IconBtn
-                  icon={showPw ? <IconEyeOff size={16} /> : <IconEye size={16} />}
-                  onClick={() => setShowPw(!showPw)}
-                  style={styles.eyeBtn}
-                />
-              }
-            />
-          </Field>
-
-          <View style={styles.formExtra}>
-            <CheckRow
-              checked={keep}
-              onToggle={() => setKeep(!keep)}
-              label="Keep me signed in"
-            />
-            <Text onPress={onForgot} style={styles.forgotText}>
-              Forgot password?
-            </Text>
+        <View style={styles.mainLayout}>
+          {/* Left Side: Branding & Welcome */}
+          <View style={styles.leftSide}>
+            <View style={styles.header}>
+              <DocLogo size={48} sub={false} />
+            </View>
+            <View style={styles.welcomeSection}>
+              <Text style={styles.title}>Welcome, Doctor</Text>
+              <Text style={styles.subtitle}>Sign in to your clinical workspace.</Text>
+            </View>
+            <View style={styles.brandingFooter}>
+               <Text style={styles.footerText}>
+                Powered by <Text style={styles.footerBrand}>iOrbit</Text>
+              </Text>
+            </View>
           </View>
-        </View>
 
-        <Btn
-          size="lg"
-          full
-          onClick={submit}
-          loading={loading}
-          style={styles.signInBtn}
-        >
-          Sign In
-        </Btn>
+          {/* Right Side: Form */}
+          <View style={styles.rightSide}>
+            <View style={styles.form}>
+              <Field label="Username">
+                <TextInput
+                  value={user}
+                  onChange={setUser}
+                  leading={<IconStethoscope size={16} color={T.textDim} />}
+                  placeholder="your.username"
+                />
+              </Field>
 
-        <View style={styles.dividerContainer}>
-          <View style={styles.divider} />
-          <Text style={styles.dividerText}>or continue with</Text>
-          <View style={styles.divider} />
-        </View>
+              <Field label="Password">
+                <TextInput
+                  value={pw}
+                  onChange={setPw}
+                  secureTextEntry={!showPw}
+                  leading={<IconLock size={16} color={T.textDim} />}
+                  placeholder="password"
+                  trailing={
+                    <IconBtn
+                      icon={showPw ? <IconEyeOff size={16} /> : <IconEye size={16} />}
+                      onClick={() => setShowPw(!showPw)}
+                      style={styles.eyeBtn}
+                    />
+                  }
+                />
+              </Field>
 
-        <Btn
-          variant="ghost"
-          full
-          onClick={submit}
-          icon={<IconGoogle size={18} />}
-          style={styles.googleBtn}
-        >
-          Google
-        </Btn>
+              <View style={styles.formExtra}>
+                <CheckRow
+                  checked={keep}
+                  onToggle={() => setKeep(!keep)}
+                  label="Keep me signed in"
+                />
+                <Text onPress={onForgot} style={styles.forgotText}>
+                  Forgot password?
+                </Text>
+              </View>
+            </View>
 
-        <View style={styles.footer}>
-          <Text style={styles.footerText}>
-            Powered by <Text style={styles.footerBrand}>iOrbit</Text>
-          </Text>
+            <Btn
+              size="lg"
+              full
+              onClick={submit}
+              loading={loading}
+              style={styles.signInBtn}
+            >
+              Sign In
+            </Btn>
+
+            <View style={styles.dividerContainer}>
+              <View style={styles.divider} />
+              <Text style={styles.dividerText}>or continue with</Text>
+              <View style={styles.divider} />
+            </View>
+
+            <Btn
+              variant="ghost"
+              full
+              onClick={submit}
+              icon={<IconGoogle size={18} />}
+              style={styles.googleBtn}
+            >
+              Google
+            </Btn>
+          </View>
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
@@ -135,32 +141,52 @@ const styles = StyleSheet.create({
     backgroundColor: T.bg,
   },
   scrollContent: {
-    padding: 26,
-    paddingTop: 34,
-    paddingBottom: 22,
     flexGrow: 1,
+    justifyContent: 'center',
+    padding: 30,
+  },
+  mainLayout: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 40,
+  },
+  leftSide: {
+    flex: 1,
+    alignItems: 'flex-start',
+    gap: 20,
+  },
+  rightSide: {
+    flex: 1.2,
+    backgroundColor: T.surface,
+    padding: 24,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: T.borderSoft,
   },
   header: {
-    alignItems: 'center',
-    marginBottom: 26,
+    marginBottom: 0,
   },
   welcomeSection: {
-    marginBottom: 22,
+    marginBottom: 0,
   },
   title: {
-    fontSize: 27,
+    fontSize: 32,
     fontWeight: '700',
-    letterSpacing: -0.2,
+    letterSpacing: -0.4,
     color: T.text,
-    lineHeight: 30,
+    lineHeight: 38,
   },
   subtitle: {
-    fontSize: 14,
+    fontSize: 15,
     color: T.textDim,
-    marginTop: 8,
+    marginTop: 10,
+    maxWidth: 240,
+  },
+  brandingFooter: {
+    marginTop: 20,
   },
   form: {
-    gap: 14,
+    gap: 12,
   },
   eyeBtn: {
     width: 28,
@@ -177,7 +203,7 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   signInBtn: {
-    marginTop: 22,
+    marginTop: 16,
     shadowColor: T.accent,
     shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.34,
@@ -188,7 +214,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
-    marginVertical: 22,
+    marginVertical: 16,
   },
   divider: {
     flex: 1,
@@ -203,12 +229,6 @@ const styles = StyleSheet.create({
   },
   googleBtn: {
     height: 48,
-  },
-  footer: {
-    flex: 1,
-    justifyContent: 'flex-end',
-    marginTop: 14,
-    alignItems: 'center',
   },
   footerText: {
     fontSize: 11,

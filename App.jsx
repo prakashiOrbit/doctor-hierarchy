@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { StatusBar, StyleSheet, View, Text, Animated, SafeAreaView, TouchableOpacity } from 'react-native';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { StatusBar, StyleSheet, View, Text, Animated, TouchableOpacity } from 'react-native';
+import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { T } from './src/theme/tokens';
 import { ALARMS as INITIAL_ALARMS, PATIENTS, SEV } from './src/data/mockData';
 import { LoginScreen } from './src/screens/LoginScreen';
@@ -15,15 +15,16 @@ import { MonitoringScreen } from './src/screens/MonitoringScreen';
 import { InstructionsScreen } from './src/screens/InstructionsScreen';
 import { InstructionPreviewScreen } from './src/screens/InstructionPreviewScreen';
 import { AlarmDetailScreen } from './src/screens/AlarmDetailScreen';
-import { LogoutDialog } from './src/components/LogoutDialog';
-import { DocLogo, Toast, TopBar, BottomNav, Avatar } from './src/components/Shared';
+import { DocLogo, Toast, TopBar, BottomNav, Avatar, ConfirmDialog } from './src/components/Shared';
 import { IconDashboard, IconUsers, IconBell, IconUser } from './src/components/Icons';
 
 function App() {
   return (
     <SafeAreaProvider>
-      <StatusBar barStyle="light-content" backgroundColor={T.bg} />
-      <AppContent />
+      <StatusBar barStyle="dark-content" backgroundColor={T.bg} />
+      <SafeAreaView style={{ flex: 1, backgroundColor: T.bg }}>
+        <AppContent />
+      </SafeAreaView>
     </SafeAreaProvider>
   );
 }
@@ -148,7 +149,7 @@ function MainApp({ onLogoutPhase, showToast }) {
   };
 
   return (
-    <SafeAreaView style={styles.mainContainer}>
+    <View style={styles.mainContainer}>
       {top ? renderTop() : (
         <>
           <TopBar 
@@ -182,12 +183,16 @@ function MainApp({ onLogoutPhase, showToast }) {
           <BottomNav items={NAV_ITEMS} active={tab} onChange={setTab} />
         </>
       )}
-      <LogoutDialog 
+      <ConfirmDialog 
         open={logoutOpen} 
         onClose={() => setLogoutOpen(false)} 
-        onConfirm={() => { setLogoutOpen(false); onLogoutPhase(); }} 
+        onConfirm={() => { setLogoutOpen(false); onLogoutPhase(); }}
+        title="Sign Out?"
+        body="You'll need to sign in again to access your patients and live monitoring."
+        confirmLabel="Sign Out"
+        danger
       />
-    </SafeAreaView>
+    </View>
   );
 }
 
@@ -216,15 +221,15 @@ function AppContent() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: T.bg },
   mainContainer: { flex: 1 },
-  splashContainer: { flex: 1, backgroundColor: '#0D1117', alignItems: 'center', justifyContent: 'center' },
+  splashContainer: { flex: 1, backgroundColor: T.bg, alignItems: 'center', justifyContent: 'center' },
   progressWrapper: { position: 'absolute', bottom: 64, left: 48, right: 48 },
-  progressBar: { height: 3, borderRadius: 2, backgroundColor: 'rgba(255,255,255,0.08)', overflow: 'hidden' },
+  progressBar: { height: 3, borderRadius: 2, backgroundColor: 'rgba(0,0,0,0.06)', overflow: 'hidden' },
   progressFill: { height: '100%', backgroundColor: T.accent },
   footer: { alignItems: 'center', marginTop: 18 },
   footerText: { fontSize: 10, color: T.textFaint, fontFamily: 'monospace' },
   footerBrand: { color: T.textDim, fontWeight: '600' },
   headerAction: { position: 'relative', width: 36, height: 36, borderRadius: 10, alignItems: 'center', justifyContent: 'center' },
-  alarmBadge: { position: 'absolute', top: 6, right: 6, minWidth: 15, height: 15, paddingHorizontal: 3, borderRadius: 999, backgroundColor: '#EF4444', alignItems: 'center', justifyContent: 'center' },
+  alarmBadge: { position: 'absolute', top: 6, right: 6, minWidth: 15, height: 15, paddingHorizontal: 3, borderRadius: 999, backgroundColor: T.bad, alignItems: 'center', justifyContent: 'center' },
   alarmBadgeText: { color: '#fff', fontSize: 9, fontWeight: '700', fontFamily: 'JetBrains Mono' },
 });
 

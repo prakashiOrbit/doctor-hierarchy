@@ -9,6 +9,7 @@ import {
   Animated,
   Modal,
   ScrollView,
+  Platform,
 } from 'react-native';
 import Svg, { Path, Defs, LinearGradient, Stop, Circle, Rect } from 'react-native-svg';
 import { T } from '../theme/tokens';
@@ -279,15 +280,18 @@ export const TopBar = ({ title, subtitle, leading, trailing, onBack, onLeadingCl
   const handleClick = onBack || onLeadingClick;
   return (
     <View style={styles.topBar}>
-      {handleClick || leading ? (
-        <TouchableOpacity onPress={handleClick} style={styles.topBarAction}>
-          {leading || <IconBack size={20} color={T.text} />}
-        </TouchableOpacity>
-      ) : null}
-      <View style={{ flex: 1 }}>
-        <Text style={styles.topBarTitle} numberOfLines={1}>{title}</Text>
-        {subtitle ? <Text style={styles.topBarSubtitle} numberOfLines={1}>{subtitle}</Text> : null}
+      <View style={styles.topBarLeft}>
+        {handleClick || leading ? (
+          <TouchableOpacity onPress={handleClick} style={styles.topBarAction}>
+            {leading || <IconBack size={20} color={T.text} />}
+          </TouchableOpacity>
+        ) : null}
+        <View>
+          <Text style={styles.topBarTitle} numberOfLines={1}>{title}</Text>
+          {subtitle ? <Text style={styles.topBarSubtitle} numberOfLines={1}>{subtitle}</Text> : null}
+        </View>
       </View>
+      <View style={{ flex: 1 }} />
       {trailing}
     </View>
   );
@@ -428,7 +432,7 @@ export const EmptyState = ({ icon, title, hint, action }) => (
 export const BottomSheet = ({ open, onClose, title, children, height }) => (
   <Modal visible={open} transparent animationType="slide" onRequestClose={onClose}>
     <TouchableOpacity activeOpacity={1} onPress={onClose} style={styles.modalOverlay}>
-      <TouchableOpacity activeOpacity={1} style={[styles.sheetContent, { maxHeight: height || '80%' }]}>
+      <TouchableOpacity activeOpacity={1} onPress={() => {}} style={[styles.sheetContent, { maxHeight: height || '80%' }]}>
         <View style={styles.sheetHandle} />
         {title && <Text style={styles.sheetTitle}>{title}</Text>}
         <ScrollView>{children}</ScrollView>
@@ -440,7 +444,7 @@ export const BottomSheet = ({ open, onClose, title, children, height }) => (
 export const ConfirmDialog = ({ open, onClose, onConfirm, title, body, confirmLabel = 'Confirm', danger }) => (
   <Modal visible={open} transparent animationType="fade" onRequestClose={onClose}>
     <TouchableOpacity activeOpacity={1} onPress={onClose} style={styles.modalOverlay}>
-      <TouchableOpacity activeOpacity={1} style={styles.dialogContent}>
+      <TouchableOpacity activeOpacity={1} onPress={() => {}} style={styles.dialogContent}>
         <View style={styles.dialogHeader}>
           <View style={[styles.dialogIcon, { backgroundColor: danger ? T.badSoft : T.accentSoft }]}>
             <IconAlert size={20} color={danger ? T.bad : T.accent} />
@@ -526,11 +530,12 @@ const styles = StyleSheet.create({
   strengthLabel: { fontSize: 11, fontWeight: '500' },
   toastContainer: { position: 'absolute', left: 16, right: 16, bottom: 88, borderWidth: 1, borderRadius: 12, padding: 14, flexDirection: 'row', alignItems: 'center', gap: 10, elevation: 8, shadowColor: '#000', shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.4, shadowRadius: 24 },
   toastText: { fontSize: 13, fontWeight: '500' },
-  topBar: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 14, paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: T.borderSoft, backgroundColor: T.bg },
-  topBarAction: { width: 36, height: 36, borderRadius: 10, alignItems: 'center', justifyContent: 'center' },
-  topBarTitle: { fontSize: 16, fontWeight: '600', color: T.text },
-  topBarSubtitle: { fontSize: 11, color: T.textDim, marginTop: 2, fontFamily: 'JetBrains Mono' },
-  bottomNav: { flexDirection: 'row', borderTopWidth: 1, borderTopColor: T.borderSoft, backgroundColor: T.bg, paddingBottom: 8, paddingTop: 6, paddingHorizontal: 4 },
+  topBar: { height: 56, flexDirection: 'row', alignItems: 'center', paddingHorizontal: 14, borderBottomWidth: 1, borderBottomColor: T.borderSoft, backgroundColor: T.bg },
+  topBarLeft: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  topBarAction: { width: 36, height: 36, borderRadius: 10, backgroundColor: T.surface, alignItems: 'center', justifyContent: 'center' },
+  topBarTitle: { fontSize: 16.5, fontWeight: '700', color: T.text, letterSpacing: -0.2 },
+  topBarSubtitle: { fontSize: 11, color: T.textDim, marginTop: 1 },
+  bottomNav: { flexDirection: 'row', borderTopWidth: 1, borderTopColor: T.borderSoft, backgroundColor: T.bg, paddingBottom: Platform.OS === 'ios' ? 12 : 6, paddingTop: 6, paddingHorizontal: '15%' },
   navItem: { flex: 1, alignItems: 'center', gap: 3, paddingVertical: 6 },
   navIconWrapper: { paddingVertical: 3, paddingHorizontal: 14, borderRadius: 999 },
   navLabel: { fontSize: 9.5, letterSpacing: 0.2 },

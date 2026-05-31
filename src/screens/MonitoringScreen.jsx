@@ -92,48 +92,49 @@ export const MonitoringScreen = ({ patient, fromAlarm, onBack, onInstructions, s
         )}
       </View>
 
-      <ScrollView style={{ flex: 1 }} contentContainerStyle={styles.scrollContent}>
-        {/* Waveforms */}
-        <View style={styles.waveforms}>
-          <WaveformView type="ecg"  color="#22D38B" label="ECG · II" value={live.hr} unit="bpm" speed={speed} height={94} />
-          <WaveformView type="spo2" color="#22D3EE" label="SpO₂ · Pleth" value={live.spo2} unit="%" speed={speed * 0.85} height={78} />
-          <WaveformView type="resp" color="#60A5FA" label="RESP" value={live.rr} unit="brpm" speed={speed * 0.5} height={70} />
-        </View>
-
-        {/* Vital cards grid */}
-        <View style={styles.vitalsGrid}>
-          {cards.map((c, i) => (
-            <View key={i} style={styles.gridItem}>
-              <VitalCard {...c} big />
-            </View>
-          ))}
-        </View>
-
-        {/* Alarm trend */}
-        <View style={styles.trendSection}>
-          <TouchableOpacity onPress={() => setShowTrend(!showTrend)} style={styles.trendHeader}>
-            <IconChart size={17} color={T.text} />
-            <Text style={styles.trendTitle}>Alarm Trend · 24h</Text>
-            <View style={{ flex: 1 }} />
-            <View style={{ transform: [{ rotate: showTrend ? '90deg' : '0deg' }] }}>
-              <IconChevron size={16} color={T.textDim} />
-            </View>
-          </TouchableOpacity>
-          {showTrend && (
-            <View style={styles.trendContent}>
-              <AlarmTrendChart data={ALARM_TREND} />
-              <View style={styles.legend}>
-                {['critical', 'high', 'medium', 'low'].map(s => (
-                  <View key={s} style={styles.legendItem}>
-                    <View style={[styles.legendDot, { backgroundColor: T[s] || (s === 'high' ? '#F97316' : s === 'medium' ? '#EAB308' : T.bad) }]} />
-                    <Text style={styles.legendText}>{s}</Text>
+      <View style={styles.mainContent}>
+        {/* Left: Waveforms */}
+        <View style={styles.leftCol}>
+          <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.waveformScroll}>
+            <WaveformView type="ecg"  color="#22D38B" label="ECG · II" value={live.hr} unit="bpm" speed={speed} height={120} />
+            <WaveformView type="spo2" color="#22D3EE" label="SpO₂ · Pleth" value={live.spo2} unit="%" speed={speed * 0.85} height={100} />
+            <WaveformView type="resp" color="#60A5FA" label="RESP" value={live.rr} unit="brpm" speed={speed * 0.5} height={90} />
+            
+            {showTrend && (
+              <View style={styles.trendSection}>
+                <View style={styles.trendHeader}>
+                  <IconChart size={17} color={T.text} />
+                  <Text style={styles.trendTitle}>Alarm Trend · 24h</Text>
+                </View>
+                <View style={styles.trendContent}>
+                  <AlarmTrendChart data={ALARM_TREND} />
+                  <View style={styles.legend}>
+                    {['critical', 'high', 'medium', 'low'].map(s => (
+                      <View key={s} style={styles.legendItem}>
+                        <View style={[styles.legendDot, { backgroundColor: T[s] || (s === 'high' ? '#F97316' : s === 'medium' ? '#EAB308' : T.bad) }]} />
+                        <Text style={styles.legendText}>{s}</Text>
+                      </View>
+                    ))}
                   </View>
-                ))}
+                </View>
               </View>
-            </View>
-          )}
+            )}
+          </ScrollView>
         </View>
-      </ScrollView>
+
+        {/* Right: Vital cards grid */}
+        <View style={styles.rightCol}>
+          <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.vitalsScroll}>
+            <View style={styles.vitalsGrid}>
+              {cards.map((c, i) => (
+                <View key={i} style={styles.gridItem}>
+                  <VitalCard {...c} big />
+                </View>
+              ))}
+            </View>
+          </ScrollView>
+        </View>
+      </View>
 
       {/* Bottom controls */}
       <View style={styles.footer}>
@@ -174,7 +175,7 @@ const CtrlBtn = ({ icon, label, onClick, active }) => (
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0D1117',
+    backgroundColor: T.bg,
   },
   header: {
     paddingHorizontal: 14,
@@ -193,7 +194,7 @@ const styles = StyleSheet.create({
     width: 34,
     height: 34,
     borderRadius: 10,
-    backgroundColor: 'rgba(255,255,255,.05)',
+    backgroundColor: 'rgba(0,0,0,.05)',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -241,22 +242,31 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '600',
   },
-  scrollContent: {
-    padding: 12,
-    paddingBottom: 30,
-    gap: 10,
+  mainContent: {
+    flex: 1,
+    flexDirection: 'row',
   },
-  waveforms: {
-    gap: 10,
+  leftCol: {
+    flex: 2,
+    borderRightWidth: 1,
+    borderRightColor: T.borderSoft,
+  },
+  rightCol: {
+    flex: 1,
+    backgroundColor: T.bg,
+  },
+  waveformScroll: {
+    padding: 12,
+    gap: 12,
+  },
+  vitalsScroll: {
+    padding: 12,
   },
   vitalsGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-    marginTop: 4,
+    gap: 10,
   },
   gridItem: {
-    width: '48.5%',
+    width: '100%',
   },
   trendSection: {
     backgroundColor: T.surface,
@@ -264,7 +274,7 @@ const styles = StyleSheet.create({
     borderColor: T.borderSoft,
     borderRadius: 12,
     overflow: 'hidden',
-    marginTop: 4,
+    marginTop: 12,
   },
   trendHeader: {
     flexDirection: 'row',
@@ -305,7 +315,7 @@ const styles = StyleSheet.create({
   footer: {
     borderTopWidth: 1,
     borderTopColor: T.borderSoft,
-    backgroundColor: '#0D1117',
+    backgroundColor: T.bg,
     paddingHorizontal: 14,
     paddingTop: 10,
     paddingBottom: Platform.OS === 'ios' ? 24 : 12,

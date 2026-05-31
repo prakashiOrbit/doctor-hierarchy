@@ -57,36 +57,40 @@ export const PatientDetailScreen = ({ patient, onClose, onMonitor, onWriteInstru
 
       {/* Profile Header */}
       <View style={styles.header}>
-        <View style={styles.avatarWrapper}>
-          <Avatar initials={initials(p.name)} color={nameColor(p.name)} size={60} />
-          <View style={styles.liveDotOverlay}>
-            <LiveDot status={p.status} size={10} pulse={p.status !== 'stable'} />
+        <View style={styles.headerMain}>
+          <View style={styles.avatarWrapper}>
+            <Avatar initials={initials(p.name)} color={nameColor(p.name)} size={56} />
+            <View style={styles.liveDotOverlay}>
+              <LiveDot status={p.status} size={10} pulse={p.status !== 'stable'} />
+            </View>
+          </View>
+          <View style={styles.headerInfo}>
+            <View style={styles.nameRow}>
+              <Text style={styles.name}>{p.name}</Text>
+              <BedChip>{p.mrn}</BedChip>
+            </View>
+            <View style={styles.metaRow}>
+              <Text style={styles.metaText}>{p.age} yrs · {p.gender === 'F' ? 'Female' : 'Male'} · <Text style={styles.bloodText}>{p.blood}</Text></Text>
+            </View>
           </View>
         </View>
-        <View style={styles.headerInfo}>
-          <View style={styles.nameRow}>
-            <Text style={styles.name}>{p.name}</Text>
-            <BedChip>{p.mrn}</BedChip>
-          </View>
-          <View style={styles.metaRow}>
-            <Text style={styles.metaText}>{p.age} yrs</Text>
-            <View style={styles.dot} />
-            <Text style={styles.metaText}>{p.gender === 'F' ? 'Female' : 'Male'}</Text>
-            <View style={styles.dot} />
-            <Text style={styles.bloodText}>{p.blood}</Text>
-          </View>
+        
+        <View style={styles.headerRight}>
           <View style={styles.wardRow}>
             <BedChip tone={T.surface2}>{p.bed}</BedChip>
             <WardTypeChip type={ward.type} />
             <Text style={styles.wardName}>{ward.name}</Text>
           </View>
+          <View style={styles.admissionStrip}>
+            <Text style={styles.admissionText}>
+              Admitted <Text style={{ color: T.text }}>{p.admitted}</Text>
+            </Text>
+          </View>
         </View>
       </View>
       
-      <View style={styles.admissionStrip}>
-        <Text style={styles.admissionText}>
-          Admitted <Text style={{ color: T.text }}>{p.admitted}</Text> · {p.dx}
-        </Text>
+      <View style={styles.dxStrip}>
+         <Text style={styles.admissionText}>{p.dx}</Text>
       </View>
 
       {/* Tabs */}
@@ -259,9 +263,24 @@ const styles = StyleSheet.create({
   },
   header: {
     paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingVertical: 10,
     flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     gap: 13,
+  },
+  headerMain: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  headerRight: {
+    alignItems: 'flex-end',
+    gap: 6,
+  },
+  dxStrip: {
+    paddingHorizontal: 16,
+    paddingBottom: 10,
   },
   avatarWrapper: {
     position: 'relative',
@@ -317,15 +336,13 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
-    marginTop: 8,
   },
   wardName: {
     fontSize: 11,
     color: T.textFaint,
   },
   admissionStrip: {
-    paddingHorizontal: 16,
-    paddingBottom: 8,
+    paddingHorizontal: 0,
   },
   admissionText: {
     fontSize: 11.5,

@@ -36,42 +36,47 @@ export const TwoFactorScreen = ({ onVerify, onBack }) => {
         <Text style={styles.backBtnText}>Back to login</Text>
       </TouchableOpacity>
 
-      <View style={styles.content}>
-        <GlowIcon icon={<IconShield />} />
-        
-        <View style={styles.headerTextContainer}>
-          <Text style={styles.title}>Secure Verification</Text>
-          <Text style={styles.subtitle}>Enter the 6-digit code sent to your device.</Text>
+      <View style={styles.mainLayout}>
+        {/* Left Side: Illustration & Title */}
+        <View style={styles.leftSide}>
+          <GlowIcon icon={<IconShield />} />
+          <View style={styles.headerTextContainer}>
+            <Text style={styles.title}>Secure Verification</Text>
+            <Text style={styles.subtitle}>Enter the 6-digit code sent to your device.</Text>
+          </View>
         </View>
 
-        <View style={styles.otpWrapper}>
-          <OTPInput value={otp} onChange={setOtp} autoFocus />
-        </View>
+        {/* Right Side: Input & Action */}
+        <View style={styles.rightSide}>
+          <View style={styles.otpWrapper}>
+            <OTPInput value={otp} onChange={setOtp} autoFocus />
+          </View>
 
-        <View style={styles.resendContainer}>
-          {s > 0 ? (
-            <Text style={styles.resendText}>
-              Resend code in <Text style={styles.countdownText}>{fmt}</Text>
-            </Text>
-          ) : (
-            <TouchableOpacity onPress={reset}>
-              <Text style={styles.resendAction}>Resend code</Text>
-            </TouchableOpacity>
-          )}
-        </View>
-      </View>
+          <View style={styles.resendContainer}>
+            {s > 0 ? (
+              <Text style={styles.resendText}>
+                Resend code in <Text style={styles.countdownText}>{fmt}</Text>
+              </Text>
+            ) : (
+              <TouchableOpacity onPress={reset}>
+                <Text style={styles.resendAction}>Resend code</Text>
+              </TouchableOpacity>
+            )}
+          </View>
 
-      <View style={styles.footer}>
-        <Btn
-          size="lg"
-          full
-          onClick={verify}
-          disabled={!full || loading}
-          loading={loading}
-          style={!full && styles.disabledBtn}
-        >
-          Verify & Continue
-        </Btn>
+          <View style={styles.footer}>
+            <Btn
+              size="lg"
+              full
+              onClick={verify}
+              disabled={!full || loading}
+              loading={loading}
+              style={!full && styles.disabledBtn}
+            >
+              Verify & Continue
+            </Btn>
+          </View>
+        </View>
       </View>
     </ScrollView>
   );
@@ -83,45 +88,63 @@ const styles = StyleSheet.create({
     backgroundColor: T.bg,
   },
   scrollContent: {
-    padding: 26,
+    padding: 30,
     flexGrow: 1,
+    justifyContent: 'center',
+  },
+  mainLayout: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 40,
+    marginTop: 10,
+  },
+  leftSide: {
+    flex: 1,
+    alignItems: 'center',
+    gap: 20,
+  },
+  rightSide: {
+    flex: 1.2,
+    backgroundColor: T.surface,
+    padding: 24,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: T.borderSoft,
+    gap: 16,
   },
   backBtn: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
-    alignSelf: 'flex-start',
-    marginTop: 8,
+    position: 'absolute',
+    top: 10,
+    left: 20,
+    zIndex: 10,
   },
   backBtnText: {
     fontSize: 13,
     color: T.textDim,
   },
-  content: {
-    alignItems: 'center',
-    marginTop: 40,
-    gap: 24,
-  },
   headerTextContainer: {
     alignItems: 'center',
-    textAlign: 'center',
     gap: 8,
   },
   title: {
-    fontSize: 23,
+    fontSize: 26,
     fontWeight: '700',
     color: T.text,
     letterSpacing: -0.1,
+    textAlign: 'center',
   },
   subtitle: {
-    fontSize: 13.5,
+    fontSize: 14,
     color: T.textDim,
     lineHeight: 20,
     textAlign: 'center',
+    maxWidth: 240,
   },
   otpWrapper: {
     width: '100%',
-    marginTop: 6,
   },
   resendContainer: {
     alignItems: 'center',
@@ -140,9 +163,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   footer: {
-    flex: 1,
-    justifyContent: 'flex-end',
-    marginBottom: 10,
+    width: '100%',
   },
   disabledBtn: {
     backgroundColor: T.surface2,

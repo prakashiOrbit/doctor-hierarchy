@@ -1,11 +1,11 @@
 // iTouch Doctor — seeded clinical data: wards, patients, alarms, instructions, presets.
 
 export const SEV = {
-  critical: { color: '#EF4444', soft: 'rgba(239,68,68,.14)', label: 'CRITICAL', rank: 4 },
-  high:     { color: '#F97316', soft: 'rgba(249,115,22,.14)', label: 'HIGH',     rank: 3 },
-  medium:   { color: '#EAB308', soft: 'rgba(234,179,8,.14)',  label: 'MEDIUM',   rank: 2 },
-  low:      { color: '#3B82F6', soft: 'rgba(59,130,246,.14)', label: 'LOW',      rank: 1 },
-  normal:   { color: '#10B981', soft: 'rgba(16,185,129,.14)', label: 'NORMAL',   rank: 0 },
+  critical: { color: '#EF4444', soft: 'rgba(239,68,68,.08)', label: 'CRITICAL', rank: 4 },
+  high:     { color: '#F97316', soft: 'rgba(249,115,22,.08)', label: 'HIGH',     rank: 3 },
+  medium:   { color: '#EAB308', soft: 'rgba(234,179,8,.08)',  label: 'MEDIUM',   rank: 2 },
+  low:      { color: '#3B82F6', soft: 'rgba(59,130,246,.08)', label: 'LOW',      rank: 1 },
+  normal:   { color: '#10B981', soft: 'rgba(16,185,129,.08)', label: 'NORMAL',   rank: 0 },
 };
 
 // Status of a patient bed

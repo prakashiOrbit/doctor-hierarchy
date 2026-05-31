@@ -68,7 +68,7 @@ export const WaveformView = ({ type = 'ecg', color = '#22D38B', height = 92, spe
   return (
     <View style={[styles.container, { height }]} onLayout={onLayout}>
       <Svg width="100%" height={height}>
-        <G stroke="rgba(255,255,255,.045)" strokeWidth="1">
+        <G stroke="rgba(0,0,0,.04)" strokeWidth="1">
           {gridRows.map(y => <Line key={`r${y}`} x1="0" y1={y} x2="100%" y2={y} />)}
           {gridCols.map(x => <Line key={`c${x}`} x1={x} y1="0" x2={x} y2={height} />)}
         </G>
@@ -99,11 +99,11 @@ export const WaveformView = ({ type = 'ecg', color = '#22D38B', height = 92, spe
 const styles = StyleSheet.create({
   container: {
     width: '100%',
-    backgroundColor: '#070B10',
+    backgroundColor: T.surface,
     borderRadius: 10,
     overflow: 'hidden',
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,.06)',
+    borderColor: T.border,
   },
   labelContainer: {
     position: 'absolute',

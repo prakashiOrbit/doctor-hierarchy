@@ -52,85 +52,88 @@ export const AlarmDetailScreen = ({ alarm, onClose, onViewPatient, onWriteInstru
           <View style={styles.handle} />
         </View>
 
-        <ScrollView contentContainerStyle={styles.scrollContent}>
-          {/* Top */}
-          <View style={styles.header}>
-            <View style={{ flex: 1 }}>
-              <View style={[styles.severityBadge, { backgroundColor: s.soft, borderColor: s.color + '44' }]}>
-                <IconAlert size={16} color={s.color} />
-                <Text style={[styles.severityText, { color: s.color }]}>{s.label}</Text>
-              </View>
-              <View style={styles.patientRow}>
-                <Avatar initials={initials(p.name)} color={nameColor(p.name)} size={34} />
-                <View>
-                  <Text style={styles.patientName}>{p.name}</Text>
-                  <Text style={styles.patientMeta}>{p.bed} · {ward?.name} · {ward?.type}</Text>
+        <View style={styles.mainLayout}>
+          {/* Left Side: Info & Violation */}
+          <View style={styles.leftCol}>
+            <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.leftScroll}>
+              <View style={styles.header}>
+                <View style={{ flex: 1 }}>
+                  <View style={[styles.severityBadge, { backgroundColor: s.soft, borderColor: s.color + '44' }]}>
+                    <IconAlert size={16} color={s.color} />
+                    <Text style={[styles.severityText, { color: s.color }]}>{s.label}</Text>
+                  </View>
+                  <View style={styles.patientRow}>
+                    <Avatar initials={initials(p.name)} color={nameColor(p.name)} size={34} />
+                    <View>
+                      <Text style={styles.patientName}>{p.name}</Text>
+                      <Text style={styles.patientMeta}>{p.bed} · {ward?.name}</Text>
+                    </View>
+                  </View>
                 </View>
               </View>
-            </View>
-            <TouchableOpacity onPress={onClose} style={styles.closeBtn}>
+              
+              <View style={styles.timeRow}>
+                <IconClock size={13} color={T.textFaint} />
+                <Text style={styles.timeText}>Raised {alarm.raisedMin} minute{alarm.raisedMin === 1 ? '' : 's'} ago</Text>
+              </View>
+
+              <View style={[styles.violationCard, { borderColor: s.color + '33' }]}>
+                <Text style={styles.paramLabel}>{meta.full}</Text>
+                <View style={styles.valueRow}>
+                  <Text style={[styles.valueText, { color: s.color }]}>{alarm.value}</Text>
+                  <Text style={[styles.unitText, { color: s.color }]}>{alarm.unit}</Text>
+                </View>
+                <View style={styles.rangeRow}>
+                  <Text style={styles.rangeNormal}>{alarm.normal}</Text>
+                  <View style={styles.deviationBadge}>
+                    {up ? <IconArrowUp size={14} color={s.color} /> : <IconArrowDown size={14} color={s.color} />}
+                    <Text style={[styles.deviationText, { color: s.color }]}>{alarm.deviation}</Text>
+                  </View>
+                </View>
+              </View>
+            </ScrollView>
+          </View>
+
+          {/* Right Side: Chart & Actions */}
+          <View style={styles.rightCol}>
+            <TouchableOpacity onPress={onClose} style={styles.closeBtnOverlay}>
               <IconClose size={17} color={T.textDim} />
             </TouchableOpacity>
-          </View>
-          
-          <View style={styles.timeRow}>
-            <IconClock size={13} color={T.textFaint} />
-            <Text style={styles.timeText}>Raised {alarm.raisedMin} minute{alarm.raisedMin === 1 ? '' : 's'} ago</Text>
-          </View>
 
-          {/* Violated parameter */}
-          <View style={[styles.violationCard, { borderColor: s.color + '33' }]}>
-            <Text style={styles.paramLabel}>{meta.full}</Text>
-            <View style={styles.valueRow}>
-              <Text style={[styles.valueText, { color: s.color }]}>{alarm.value}</Text>
-              <Text style={[styles.unitText, { color: s.color }]}>{alarm.unit}</Text>
-            </View>
-            <View style={styles.rangeRow}>
-              <Text style={styles.rangeNormal}>{alarm.normal}</Text>
-              <View style={styles.deviationBadge}>
-                {up ? <IconArrowUp size={14} color={s.color} /> : <IconArrowDown size={14} color={s.color} />}
-                <Text style={[styles.deviationText, { color: s.color }]}>
-                  {alarm.deviation} {alarm.unit === '°C' ? '°C' : alarm.unit === '%' ? '%' : alarm.unit === 'bpm' ? 'bpm' : 'over'}
-                </Text>
+            <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.rightScroll}>
+              <View style={styles.historySection}>
+                <View style={styles.historyHeader}>
+                  <Text style={styles.historyTitle}>Last 30 min</Text>
+                  <View style={styles.historyLegend}>
+                    <View style={[styles.legendDot, { backgroundColor: s.color }]} />
+                    <Text style={[styles.legendText, { color: s.color }]}>alarm window</Text>
+                  </View>
+                </View>
+                <View style={styles.chartWrapper}>
+                  <VitalsLineChart series={series} color={s.color} normalLow={r.low} normalHigh={r.high} height={80} />
+                  <View style={styles.chartLabels}>
+                    <Text style={styles.chartLabel}>−30m</Text>
+                    <Text style={[styles.chartLabel, { color: s.color }]}>now</Text>
+                  </View>
+                </View>
               </View>
-            </View>
-          </View>
 
-          {/* Historical context */}
-          <View style={styles.historySection}>
-            <View style={styles.historyHeader}>
-              <Text style={styles.historyTitle}>Last 30 min</Text>
-              <View style={styles.historyLegend}>
-                <View style={[styles.legendDot, { backgroundColor: s.color }]} />
-                <Text style={[styles.legendText, { color: s.color }]}>alarm window</Text>
+              <View style={styles.actions}>
+                <Btn full size="lg" icon={<IconCheck size={18} color="#fff" />} onClick={() => { showToast('Alarm acknowledged', 'good'); onAcknowledge(alarm); }}>
+                  Acknowledge
+                </Btn>
+                <View style={styles.actionRow}>
+                  <Btn variant="ghost" style={{ flex: 1 }} icon={<IconUser size={16} color={T.text} />} onClick={() => onViewPatient(p)}>
+                    Patient
+                  </Btn>
+                  <Btn variant="ghost" style={{ flex: 1 }} icon={<IconEdit size={15} color={T.text} />} onClick={() => onWriteInstruction(p)}>
+                    Instruction
+                  </Btn>
+                </View>
               </View>
-            </View>
-            <View style={styles.chartWrapper}>
-              <VitalsLineChart series={series} color={s.color} normalLow={r.low} normalHigh={r.high} height={100} />
-              <View style={styles.chartLabels}>
-                <Text style={styles.chartLabel}>−30m</Text>
-                <Text style={styles.chartLabel}>−20m</Text>
-                <Text style={styles.chartLabel}>−10m</Text>
-                <Text style={[styles.chartLabel, { color: s.color }]}>now</Text>
-              </View>
-            </View>
+            </ScrollView>
           </View>
-
-          {/* Actions */}
-          <View style={styles.actions}>
-            <Btn full size="lg" icon={<IconCheck size={18} color="#fff" />} onClick={() => { showToast('Alarm acknowledged', 'good'); onAcknowledge(alarm); }}>
-              Acknowledge Alarm
-            </Btn>
-            <View style={styles.actionRow}>
-              <Btn variant="ghost" style={{ flex: 1 }} icon={<IconUser size={16} color={T.text} />} onClick={() => onViewPatient(p)}>
-                View Patient
-              </Btn>
-              <Btn variant="ghost" style={{ flex: 1 }} icon={<IconEdit size={15} color={T.text} />} onClick={() => onWriteInstruction(p)}>
-                Instruction
-              </Btn>
-            </View>
-          </View>
-        </ScrollView>
+        </View>
       </View>
     </View>
   );
@@ -151,7 +154,7 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 22,
     borderTopRightRadius: 22,
     borderTopWidth: 1,
-    maxHeight: '94%',
+    height: '92%',
   },
   handleContainer: {
     paddingVertical: 10,
@@ -163,9 +166,25 @@ const styles = StyleSheet.create({
     borderRadius: 2,
     backgroundColor: T.border,
   },
-  scrollContent: {
-    paddingHorizontal: 16,
-    paddingBottom: 24,
+  mainLayout: {
+    flex: 1,
+    flexDirection: 'row',
+  },
+  leftCol: {
+    flex: 1,
+    borderRightWidth: 1,
+    borderRightColor: T.borderSoft,
+  },
+  rightCol: {
+    flex: 1.1,
+    position: 'relative',
+  },
+  leftScroll: {
+    padding: 16,
+    gap: 12,
+  },
+  rightScroll: {
+    padding: 16,
     gap: 16,
   },
   header: {
@@ -204,7 +223,11 @@ const styles = StyleSheet.create({
     fontSize: 11.5,
     color: T.textDim,
   },
-  closeBtn: {
+  closeBtnOverlay: {
+    position: 'absolute',
+    top: 0,
+    right: 14,
+    zIndex: 20,
     width: 32,
     height: 32,
     borderRadius: 9,
@@ -216,22 +239,21 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
-    marginTop: -6,
   },
   timeText: {
-    fontSize: 12,
+    fontSize: 11,
     color: T.textFaint,
     fontFamily: 'JetBrains Mono',
   },
   violationCard: {
-    backgroundColor: T.surface, // Reference used gradient, surface for simplicity
+    backgroundColor: T.surface,
     borderWidth: 1,
     borderRadius: 14,
-    padding: 16,
+    padding: 14,
     alignItems: 'center',
   },
   paramLabel: {
-    fontSize: 11,
+    fontSize: 10,
     fontWeight: '700',
     letterSpacing: 1,
     color: T.textDim,
@@ -241,26 +263,25 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'baseline',
     gap: 8,
-    marginVertical: 8,
+    marginVertical: 4,
   },
   valueText: {
-    fontSize: 52,
+    fontSize: 44,
     fontWeight: '800',
     fontFamily: 'JetBrains Mono',
     letterSpacing: -1,
   },
   unitText: {
-    fontSize: 16,
+    fontSize: 14,
     opacity: 0.8,
   },
   rangeRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
-    marginTop: 8,
   },
   rangeNormal: {
-    fontSize: 11.5,
+    fontSize: 11,
     color: T.textDim,
     fontFamily: 'JetBrains Mono',
   },
@@ -270,7 +291,7 @@ const styles = StyleSheet.create({
     gap: 3,
   },
   deviationText: {
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: '700',
   },
   historySection: {
@@ -282,7 +303,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   historyTitle: {
-    fontSize: 11,
+    fontSize: 10.5,
     fontWeight: '700',
     letterSpacing: 0.8,
     color: T.textDim,
@@ -299,16 +320,16 @@ const styles = StyleSheet.create({
     borderRadius: 2,
   },
   legendText: {
-    fontSize: 10.5,
+    fontSize: 10,
     fontFamily: 'JetBrains Mono',
   },
   chartWrapper: {
-    backgroundColor: '#0B0F15',
+    backgroundColor: T.surface,
     borderWidth: 1,
     borderColor: T.borderSoft,
     borderRadius: 12,
-    padding: 12,
-    paddingBottom: 6,
+    padding: 10,
+    paddingBottom: 4,
   },
   chartLabels: {
     flexDirection: 'row',
@@ -316,15 +337,15 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   chartLabel: {
-    fontSize: 9.5,
+    fontSize: 9,
     color: T.textFaint,
     fontFamily: 'JetBrains Mono',
   },
   actions: {
-    gap: 9,
+    gap: 8,
   },
   actionRow: {
     flexDirection: 'row',
-    gap: 9,
+    gap: 8,
   },
 });

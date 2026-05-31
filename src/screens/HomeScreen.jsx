@@ -26,74 +26,82 @@ export const HomeScreen = ({ alarms, onAlarm, onPatient }) => {
   const criticalPatients = PATIENTS.filter(p => p.status === 'critical').length;
 
   return (
-    <ScrollView contentContainerStyle={styles.scrollContent} style={styles.container}>
+    <View style={styles.container}>
       {/* Greeting strip */}
-      <View style={styles.greetingStrip}>
-        <View>
-          <Text style={styles.greetingText}>Good morning,</Text>
-          <Text style={styles.doctorName}>Dr. Shah</Text>
-        </View>
-        <View style={styles.statsRow}>
-          <MiniStat label="ALARMS" value={alarms.length} color={alarms.length ? SEV.high.color : T.good} />
-          <MiniStat label="PATIENTS" value={PATIENTS.length} color={T.accent} />
-          <MiniStat label="CRITICAL" value={criticalPatients} color={SEV.critical.color} />
-        </View>
-      </View>
-
-      {/* Active alarms */}
-      <View style={styles.section}>
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Active Alarms</Text>
-          {alarms.length > 0 && (
-            <View style={[styles.alarmCountBadge, { backgroundColor: SEV.critical.color }]}>
-              <Text style={styles.alarmCountText}>{alarms.length}</Text>
-            </View>
-          )}
-          <View style={{ flex: 1 }} />
-          {critCount > 0 && <Text style={styles.critSubText}>{critCount} critical</Text>}
-        </View>
-
-        {alarms.length === 0 ? (
-          <View style={styles.emptyAlarms}>
-            <View style={styles.checkCircleWrapper}>
-              <IconCheckCircle size={28} color={T.good} />
-            </View>
-            <Text style={styles.emptyTitle}>All patients stable</Text>
-            <Text style={styles.emptySub}>No active alarms across your wards.</Text>
+      <View style={styles.greetingStripOuter}>
+        <View style={styles.greetingStrip}>
+          <View>
+            <Text style={styles.greetingText}>Good morning,</Text>
+            <Text style={styles.doctorName}>Dr. Shah</Text>
           </View>
-        ) : (
-          <View style={styles.alarmList}>
-            {sorted.map(a => (
-              <AlarmCard 
-                key={a.id} 
-                alarm={a} 
-                patient={patientById(a.patientId)} 
-                onClick={() => onAlarm(a)} 
-              />
-            ))}
+          <View style={styles.statsRow}>
+            <MiniStat label="ALARMS" value={alarms.length} color={alarms.length ? SEV.high.color : T.good} />
+            <MiniStat label="PATIENTS" value={PATIENTS.length} color={T.accent} />
+            <MiniStat label="CRITICAL" value={criticalPatients} color={SEV.critical.color} />
           </View>
-        )}
+        </View>
       </View>
 
-      {/* My patients by ward */}
-      <View style={styles.section}>
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>My Patients</Text>
-          <Text style={styles.patientTotal}>{PATIENTS.length}</Text>
+      <View style={styles.mainContent}>
+        {/* Left: Active alarms */}
+        <View style={styles.column}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Active Alarms</Text>
+            {alarms.length > 0 && (
+              <View style={[styles.alarmCountBadge, { backgroundColor: SEV.critical.color }]}>
+                <Text style={styles.alarmCountText}>{alarms.length}</Text>
+              </View>
+            )}
+            <View style={{ flex: 1 }} />
+            {critCount > 0 && <Text style={styles.critSubText}>{critCount} critical</Text>}
+          </View>
+
+          <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.columnScroll}>
+            {alarms.length === 0 ? (
+              <View style={styles.emptyAlarms}>
+                <View style={styles.checkCircleWrapper}>
+                  <IconCheckCircle size={28} color={T.good} />
+                </View>
+                <Text style={styles.emptyTitle}>All patients stable</Text>
+                <Text style={styles.emptySub}>No active alarms across your wards.</Text>
+              </View>
+            ) : (
+              <View style={styles.alarmList}>
+                {sorted.map(a => (
+                  <AlarmCard 
+                    key={a.id} 
+                    alarm={a} 
+                    patient={patientById(a.patientId)} 
+                    onClick={() => onAlarm(a)} 
+                  />
+                ))}
+              </View>
+            )}
+          </ScrollView>
         </View>
-        <View style={styles.wardList}>
-          {WARDS.map(w => (
-            <WardAccordion 
-              key={w.id} 
-              ward={w} 
-              patients={patientsInWard(w.id)}
-              defaultOpen={w.type !== 'GENERAL'} 
-              onPatient={onPatient}
-            />
-          ))}
+
+        {/* Right: My patients by ward */}
+        <View style={[styles.column, { borderLeftWidth: 1, borderLeftColor: T.borderSoft }]}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>My Patients</Text>
+            <Text style={styles.patientTotal}>{PATIENTS.length}</Text>
+          </View>
+          <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.columnScroll}>
+            <View style={styles.wardList}>
+              {WARDS.map(w => (
+                <WardAccordion 
+                  key={w.id} 
+                  ward={w} 
+                  patients={patientsInWard(w.id)}
+                  defaultOpen={w.type !== 'GENERAL'} 
+                  onPatient={onPatient}
+                />
+              ))}
+            </View>
+          </ScrollView>
         </View>
       </View>
-    </ScrollView>
+    </View>
   );
 };
 
@@ -102,21 +110,34 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: T.bg,
   },
-  scrollContent: {
-    padding: 14,
-    paddingBottom: 40,
-    gap: 20,
+  greetingStripOuter: {
+    paddingHorizontal: 14,
+    paddingTop: 10,
+    paddingBottom: 4,
   },
   greetingStrip: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: T.surface, // RN doesn't support easy complex gradients without extra libs, using surface for now
+    backgroundColor: T.surface,
     borderWidth: 1,
     borderColor: T.borderSoft,
     borderRadius: 14,
-    paddingVertical: 12,
+    paddingVertical: 10,
     paddingHorizontal: 14,
+  },
+  mainContent: {
+    flex: 1,
+    flexDirection: 'row',
+  },
+  column: {
+    flex: 1,
+    paddingHorizontal: 14,
+    paddingTop: 10,
+  },
+  columnScroll: {
+    paddingBottom: 30,
+    gap: 12,
   },
   greetingText: {
     fontSize: 12,

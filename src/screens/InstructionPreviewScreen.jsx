@@ -93,7 +93,7 @@ const DocBlock = ({ title, lines }) => (
 const styles = StyleSheet.create({
   container: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: '#0D1117',
+    backgroundColor: T.bg,
     zIndex: 45,
   },
   header: {
@@ -110,7 +110,7 @@ const styles = StyleSheet.create({
     width: 34,
     height: 34,
     borderRadius: 10,
-    backgroundColor: 'rgba(255,255,255,.05)',
+    backgroundColor: 'rgba(0,0,0,.05)',
     alignItems: 'center',
     justifyContent: 'center',
   },

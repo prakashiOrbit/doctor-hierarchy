@@ -67,7 +67,7 @@ export const BedChip = ({ children, tone }) => {
   return (
     <View style={[
       styles.bedChip,
-      { backgroundColor: tone || 'rgba(255,255,255,.05)' }
+      { backgroundColor: tone || 'rgba(0,0,0,.05)' }
     ]}>
       <Text style={styles.bedChipText}>{children}</Text>
     </View>
@@ -291,10 +291,10 @@ export const VitalsLineChart = ({ series, color, normalLow, normalHigh, height =
         </LinearGradient>
       </Defs>
       {normalHigh != null && (
-        <Path d={`M0 ${y(normalHigh)} L${W} ${y(normalHigh)}`} stroke="rgba(255,255,255,.14)" strokeWidth="1" strokeDasharray="3,3" />
+        <Path d={`M0 ${y(normalHigh)} L${W} ${y(normalHigh)}`} stroke="rgba(0,0,0,.1)" strokeWidth="1" strokeDasharray="3,3" />
       )}
       {normalLow != null && (
-        <Path d={`M0 ${y(normalLow)} L${W} ${y(normalLow)}`} stroke="rgba(255,255,255,.14)" strokeWidth="1" strokeDasharray="3,3" />
+        <Path d={`M0 ${y(normalLow)} L${W} ${y(normalLow)}`} stroke="rgba(0,0,0,.1)" strokeWidth="1" strokeDasharray="3,3" />
       )}
       <Path d={area} fill="url(#vlc)" />
       <Path d={path} fill="none" stroke={color} strokeWidth="2" strokeLinejoin="round" strokeLinecap="round" />

@@ -1,15 +1,56 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import {
   View,
   Text,
   ScrollView,
   StyleSheet,
-  Platform,
+  TouchableOpacity,
+  Animated,
+  Easing,
 } from 'react-native';
 import { T } from '../theme/tokens';
 import { SEV, PATIENTS, WARDS, patientsInWard, patientById } from '../data/mockData';
 import { AlarmCard, WardAccordion } from '../components/Clinical';
-import { IconCheckCircle } from '../components/Icons';
+import { IconCheckCircle, IconClipboardList } from '../components/Icons';
+
+const PulsingDot = () => {
+  const scale = useRef(new Animated.Value(1)).current;
+  const opacity = useRef(new Animated.Value(0.6)).current;
+
+  useEffect(() => {
+    Animated.loop(
+      Animated.parallel([
+        Animated.timing(scale, {
+          toValue: 2.5,
+          duration: 1600,
+          easing: Easing.out(Easing.ease),
+          useNativeDriver: true,
+        }),
+        Animated.timing(opacity, {
+          toValue: 0,
+          duration: 1600,
+          easing: Easing.out(Easing.ease),
+          useNativeDriver: true,
+        }),
+      ])
+    ).start();
+  }, []);
+
+  return (
+    <View style={styles.dotContainer}>
+      <Animated.View
+        style={[
+          styles.pulsingRing,
+          {
+            transform: [{ scale }],
+            opacity,
+          },
+        ]}
+      />
+      <View style={styles.solidDot} />
+    </View>
+  );
+};
 
 export const MiniStat = ({ label, value, color }) => {
   return (
@@ -20,7 +61,7 @@ export const MiniStat = ({ label, value, color }) => {
   );
 };
 
-export const HomeScreen = ({ alarms, onAlarm, onPatient }) => {
+export const HomeScreen = ({ alarms, onAlarm, onPatient, onOnCall, onRounds }) => {
   const sorted = [...alarms].sort((a, b) => SEV[b.severity].rank - SEV[a.severity].rank || a.raisedMin - b.raisedMin);
   const critCount = alarms.filter(a => a.severity === 'critical').length;
   const criticalPatients = PATIENTS.filter(p => p.status === 'critical').length;
@@ -32,7 +73,13 @@ export const HomeScreen = ({ alarms, onAlarm, onPatient }) => {
         <View style={styles.greetingStrip}>
           <View>
             <Text style={styles.greetingText}>Good morning,</Text>
-            <Text style={styles.doctorName}>Dr. Shah</Text>
+            <View style={styles.nameRow}>
+              <Text style={styles.doctorName}>Dr. Shah</Text>
+              <TouchableOpacity onPress={onOnCall} style={styles.onCallChip}>
+                <PulsingDot />
+                <Text style={styles.onCallText}>ON CALL</Text>
+              </TouchableOpacity>
+            </View>
           </View>
           <View style={styles.statsRow}>
             <MiniStat label="ALARMS" value={alarms.length} color={alarms.length ? SEV.high.color : T.good} />
@@ -85,6 +132,11 @@ export const HomeScreen = ({ alarms, onAlarm, onPatient }) => {
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>My Patients</Text>
             <Text style={styles.patientTotal}>{PATIENTS.length}</Text>
+            <View style={{ flex: 1 }} />
+            <TouchableOpacity onPress={onRounds} style={styles.roundsButton}>
+              <IconClipboardList size={14} color={T.textDim} />
+              <Text style={styles.roundsButtonText}>Rounds</Text>
+            </TouchableOpacity>
           </View>
           <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.columnScroll}>
             <View style={styles.wardList}>
@@ -143,11 +195,53 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: T.textDim,
   },
+  nameRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginTop: 2,
+  },
   doctorName: {
     fontSize: 17,
     fontWeight: '700',
     color: T.text,
     letterSpacing: -0.1,
+  },
+  onCallChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    paddingVertical: 2,
+    paddingHorizontal: 8,
+    borderRadius: 99,
+    backgroundColor: T.good + '22', // rgba equivalent
+    borderWidth: 1,
+    borderColor: T.good + '55',
+  },
+  onCallText: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: T.good,
+    letterSpacing: 0.5,
+  },
+  dotContainer: {
+    width: 6,
+    height: 6,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  solidDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: T.good,
+  },
+  pulsingRing: {
+    position: 'absolute',
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: T.good,
   },
   statsRow: {
     flexDirection: 'row',
@@ -170,15 +264,12 @@ const styles = StyleSheet.create({
     color: T.textFaint,
     marginTop: 3,
   },
-  section: {
-    gap: 10,
-  },
   sectionHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
     paddingHorizontal: 2,
-    marginBottom: 2,
+    marginBottom: 10,
   },
   sectionTitle: {
     fontSize: 11,
@@ -186,6 +277,22 @@ const styles = StyleSheet.create({
     letterSpacing: 0.9,
     color: T.textDim,
     textTransform: 'uppercase',
+  },
+  roundsButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingVertical: 4,
+    paddingHorizontal: 10,
+    borderRadius: 9,
+    borderWidth: 1,
+    borderColor: T.borderSoft,
+    backgroundColor: 'transparent',
+  },
+  roundsButtonText: {
+    fontSize: 11.5,
+    fontWeight: '600',
+    color: T.textDim,
   },
   alarmCountBadge: {
     paddingVertical: 1,

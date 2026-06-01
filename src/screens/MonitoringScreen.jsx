@@ -8,7 +8,7 @@ import {
   Platform,
 } from 'react-native';
 import { T } from '../theme/tokens';
-import { WARDS, RANGES, ALARM_TREND, vitalStatus } from '../data/mockData';
+import { WARV2_BG = '#050810', SEV, WARDS, RANGES, ALARM_TREND, vitalStatus } from '../data/mockData';
 import {
   LiveDot,
   BedChip,
@@ -24,6 +24,8 @@ import {
   IconShare,
 } from '../components/Icons';
 import { WaveformView } from '../components/WaveformView';
+
+const V2_BG = '#050810';
 
 export const MonitoringScreen = ({ patient, fromAlarm, onBack, onInstructions, speed = 1 }) => {
   const p = patient;
@@ -74,8 +76,8 @@ export const MonitoringScreen = ({ patient, fromAlarm, onBack, onInstructions, s
             <Text style={styles.wardInfo}>{ward?.name} · {ward?.type}</Text>
           </View>
           {fromAlarm ? (
-            <View style={[styles.statusBadge, { backgroundColor: T.badSoft, borderColor: T.bad + '44' }]}>
-              <Text style={[styles.statusBadgeText, { color: T.bad }]}>FROM ALARM</Text>
+            <View style={[styles.statusBadge, { backgroundColor: SEV.critical.soft, borderColor: SEV.critical.color + '44' }]}>
+              <Text style={[styles.statusBadgeText, { color: SEV.critical.color }]}>FROM ALARM</Text>
             </View>
           ) : (
             <View style={[styles.statusBadge, { backgroundColor: 'rgba(16,185,129,.12)' }]}>
@@ -85,9 +87,11 @@ export const MonitoringScreen = ({ patient, fromAlarm, onBack, onInstructions, s
           )}
         </View>
         {fromAlarm && (
-          <View style={[styles.alarmBar, { backgroundColor: T.badSoft, borderColor: T.bad + '33' }]}>
-            <IconAlert size={15} color={T.bad} />
-            <Text style={[styles.alarmText, { color: T.bad }]}>CRITICAL: {fromAlarm.desc}</Text>
+          <View style={[styles.alarmBar, { backgroundColor: SEV[fromAlarm.severity].soft, borderColor: SEV[fromAlarm.severity].color + '33' }]}>
+            <IconAlert size={15} color={SEV[fromAlarm.severity].color} />
+            <Text style={[styles.alarmText, { color: SEV[fromAlarm.severity].color }]}>
+              {SEV[fromAlarm.severity].label}: {fromAlarm.desc}
+            </Text>
           </View>
         )}
       </View>
@@ -96,29 +100,33 @@ export const MonitoringScreen = ({ patient, fromAlarm, onBack, onInstructions, s
         {/* Left: Waveforms */}
         <View style={styles.leftCol}>
           <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.waveformScroll}>
-            <WaveformView type="ecg"  color="#22D38B" label="ECG · II" value={live.hr} unit="bpm" speed={speed} height={120} />
-            <WaveformView type="spo2" color="#22D3EE" label="SpO₂ · Pleth" value={live.spo2} unit="%" speed={speed * 0.85} height={100} />
-            <WaveformView type="resp" color="#60A5FA" label="RESP" value={live.rr} unit="brpm" speed={speed * 0.5} height={90} />
+            <WaveformView type="ecg"  color="#22D38B" label="ECG · II" value={live.hr} unit="bpm" speed={speed} height={110} />
+            <WaveformView type="spo2" color="#22D3EE" label="SpO₂ · Pleth" value={live.spo2} unit="%" speed={speed * 0.85} height={90} />
+            <WaveformView type="resp" color="#60A5FA" label="RESP" value={live.rr} unit="brpm" speed={speed * 0.5} height={80} />
             
-            {showTrend && (
-              <View style={styles.trendSection}>
-                <View style={styles.trendHeader}>
-                  <IconChart size={17} color={T.text} />
-                  <Text style={styles.trendTitle}>Alarm Trend · 24h</Text>
+            <View style={styles.trendSection}>
+              <TouchableOpacity onPress={() => setShowTrend(!showTrend)} style={styles.trendHeader}>
+                <IconChart size={17} color={T.text} />
+                <Text style={styles.trendTitle}>Alarm Trend · 24h</Text>
+                <View style={{ flex: 1 }} />
+                <View style={{ transform: [{ rotate: showTrend ? '90deg' : '0deg' }] }}>
+                  <IconChevron size={16} color={T.textDim} />
                 </View>
+              </TouchableOpacity>
+              {showTrend && (
                 <View style={styles.trendContent}>
                   <AlarmTrendChart data={ALARM_TREND} />
                   <View style={styles.legend}>
                     {['critical', 'high', 'medium', 'low'].map(s => (
                       <View key={s} style={styles.legendItem}>
-                        <View style={[styles.legendDot, { backgroundColor: T[s] || (s === 'high' ? '#F97316' : s === 'medium' ? '#EAB308' : T.bad) }]} />
+                        <View style={[styles.legendDot, { backgroundColor: SEV[s].color }]} />
                         <Text style={styles.legendText}>{s}</Text>
                       </View>
                     ))}
                   </View>
                 </View>
-              </View>
-            )}
+              )}
+            </View>
           </ScrollView>
         </View>
 
@@ -128,7 +136,7 @@ export const MonitoringScreen = ({ patient, fromAlarm, onBack, onInstructions, s
             <View style={styles.vitalsGrid}>
               {cards.map((c, i) => (
                 <View key={i} style={styles.gridItem}>
-                  <VitalCard {...c} big />
+                  <VitalCard {...c} big status={c.status} />
                 </View>
               ))}
             </View>
@@ -158,6 +166,216 @@ export const MonitoringScreen = ({ patient, fromAlarm, onBack, onInstructions, s
     </View>
   );
 };
+
+const CtrlBtn = ({ icon, label, onClick, active }) => (
+  <TouchableOpacity 
+    onPress={onClick} 
+    style={[
+      styles.ctrlBtn, 
+      active && { borderColor: T.accent, backgroundColor: T.accent + '15' }
+    ]}
+  >
+    {React.cloneElement(icon, { color: active ? T.accent : T.text })}
+    <Text style={[styles.ctrlBtnLabel, { color: active ? T.accent : T.text }]}>{label}</Text>
+  </TouchableOpacity>
+);
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: V2_BG,
+  },
+  header: {
+    paddingHorizontal: 14,
+    paddingTop: 10,
+    paddingBottom: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: T.borderSoft,
+    gap: 8,
+  },
+  headerTop: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  backBtn: {
+    width: 34,
+    height: 34,
+    borderRadius: 10,
+    backgroundColor: 'rgba(255,255,255,.05)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  patientRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 7,
+  },
+  patientName: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: T.text,
+    letterSpacing: -0.1,
+  },
+  wardInfo: {
+    fontSize: 11,
+    color: T.textDim,
+    marginTop: 1,
+  },
+  statusBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 4,
+    paddingHorizontal: 9,
+    borderRadius: 7,
+    borderWidth: 1,
+    borderColor: 'transparent',
+  },
+  statusBadgeText: {
+    fontSize: 10,
+    fontWeight: '700',
+    letterSpacing: 0.6,
+    fontFamily: 'JetBrains Mono',
+  },
+  alarmBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingVertical: 7,
+    paddingHorizontal: 10,
+    borderRadius: 9,
+    borderWidth: 1,
+  },
+  alarmText: {
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  mainContent: {
+    flex: 1,
+    flexDirection: 'row',
+  },
+  leftCol: {
+    flex: 2,
+    borderRightWidth: 1,
+    borderRightColor: T.borderSoft,
+  },
+  rightCol: {
+    flex: 1.1,
+  },
+  waveformScroll: {
+    padding: 12,
+    gap: 10,
+  },
+  vitalsScroll: {
+    padding: 12,
+  },
+  vitalsGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  gridItem: {
+    width: '48%',
+  },
+  trendSection: {
+    backgroundColor: T.surface,
+    borderWidth: 1,
+    borderColor: T.borderSoft,
+    borderRadius: 12,
+    overflow: 'hidden',
+    marginTop: 4,
+  },
+  trendHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 9,
+    padding: 12,
+  },
+  trendTitle: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: T.text,
+  },
+  trendContent: {
+    paddingHorizontal: 14,
+    paddingBottom: 14,
+  },
+  legend: {
+    flexDirection: 'row',
+    gap: 12,
+    marginTop: 10,
+    flexWrap: 'wrap',
+  },
+  legendItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+  },
+  legendDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 2,
+  },
+  legendText: {
+    fontSize: 10,
+    color: T.textDim,
+    textTransform: 'capitalize',
+  },
+  footer: {
+    borderTopWidth: 1,
+    borderTopColor: T.borderSoft,
+    backgroundColor: V2_BG,
+    paddingHorizontal: 14,
+    paddingTop: 10,
+    paddingBottom: Platform.OS === 'ios' ? 24 : 12,
+    gap: 9,
+  },
+  rangeBar: {
+    flexDirection: 'row',
+    gap: 4,
+    backgroundColor: T.surface,
+    borderRadius: 10,
+    padding: 3,
+  },
+  rangeBtn: {
+    flex: 1,
+    paddingVertical: 7,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  rangeBtnActive: {
+    backgroundColor: T.accent,
+  },
+  rangeBtnText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: T.textDim,
+    fontFamily: 'JetBrains Mono',
+  },
+  rangeBtnTextActive: {
+    color: '#fff',
+  },
+  actionRow: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  ctrlBtn: {
+    flex: 1,
+    height: 44,
+    borderRadius: 11,
+    borderWidth: 1,
+    borderColor: T.border,
+    backgroundColor: T.surface,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 7,
+  },
+  ctrlBtnLabel: {
+    fontSize: 12.5,
+    fontWeight: '600',
+  },
+});
 
 const CtrlBtn = ({ icon, label, onClick, active }) => (
   <TouchableOpacity 

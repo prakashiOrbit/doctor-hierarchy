@@ -28,11 +28,25 @@ import {
   IconPhone,
   IconClipboard,
   IconPlus,
+  IconHandshake,
+  IconFileDoc,
+  IconNotepad,
+  IconChevron,
 } from '../components/Icons';
 
-export const PatientDetailScreen = ({ patient, onClose, onMonitor, onWriteInstruction }) => {
+export const PatientDetailScreen = ({ 
+  patient, 
+  onClose, 
+  onMonitor, 
+  onWriteInstruction, 
+  onVitalTrend, 
+  onNote, 
+  onConsent, 
+  onReferral 
+}) => {
   const p = patient;
   const [tab, setTab] = useState('overview');
+  const [menuOpen, setMenuOpen] = useState(false);
   const ward = WARDS.find(w => w.id === p.wardId);
   const v = p.vitals;
 
@@ -50,73 +64,95 @@ export const PatientDetailScreen = ({ patient, onClose, onMonitor, onWriteInstru
           <IconClose size={18} color={T.text} />
         </TouchableOpacity>
         <View style={styles.grabber} />
-        <TouchableOpacity style={styles.controlBtn}>
+        <TouchableOpacity onPress={() => setMenuOpen(!menuOpen)} style={styles.controlBtn}>
           <IconDots size={18} color={T.textDim} />
         </TouchableOpacity>
+        
+        {menuOpen && (
+          <View style={styles.menuOverlay}>
+            <TouchableOpacity 
+              style={styles.menuItem} 
+              onPress={() => { setMenuOpen(false); onReferral?.(); }}
+            >
+              <IconHandshake size={15} color={T.textDim} />
+              <Text style={styles.menuItemText}>Refer patient</Text>
+            </TouchableOpacity>
+            <TouchableOpacity 
+              style={[styles.menuItem, styles.menuItemBorder]} 
+              onPress={() => { setMenuOpen(false); onConsent?.(); }}
+            >
+              <IconFileDoc size={15} color={T.textDim} />
+              <Text style={styles.menuItemText}>Consents & Forms</Text>
+            </TouchableOpacity>
+            <TouchableOpacity 
+              style={[styles.menuItem, styles.menuItemBorder]} 
+              onPress={() => { setMenuOpen(false); onNote?.(); }}
+            >
+              <IconNotepad size={15} color={T.textDim} />
+              <Text style={styles.menuItemText}>Write note</Text>
+            </TouchableOpacity>
+          </View>
+        )}
       </View>
 
-      {/* Profile Header */}
-      <View style={styles.header}>
-        <View style={styles.headerMain}>
-          <View style={styles.avatarWrapper}>
-            <Avatar initials={initials(p.name)} color={nameColor(p.name)} size={56} />
-            <View style={styles.liveDotOverlay}>
-              <LiveDot status={p.status} size={10} pulse={p.status !== 'stable'} />
+      <ScrollView contentContainerStyle={styles.mainScroll} showsVerticalScrollIndicator={false}>
+        {/* Profile Header */}
+        <View style={styles.header}>
+          <View style={styles.headerMain}>
+            <View style={styles.avatarWrapper}>
+              <Avatar initials={initials(p.name)} color={nameColor(p.name)} size={60} />
+              <View style={styles.liveDotOverlay}>
+                <LiveDot status={p.status} size={10} pulse={p.status !== 'stable'} />
+              </View>
             </View>
-          </View>
-          <View style={styles.headerInfo}>
-            <View style={styles.nameRow}>
-              <Text style={styles.name}>{p.name}</Text>
-              <BedChip>{p.mrn}</BedChip>
-            </View>
-            <View style={styles.metaRow}>
-              <Text style={styles.metaText}>{p.age} yrs · {p.gender === 'F' ? 'Female' : 'Male'} · <Text style={styles.bloodText}>{p.blood}</Text></Text>
+            <View style={styles.headerInfo}>
+              <View style={styles.nameRow}>
+                <Text style={styles.name}>{p.name}</Text>
+                <BedChip>{p.mrn}</BedChip>
+              </View>
+              <View style={styles.metaRow}>
+                <Text style={styles.metaText}>{p.age} yrs · {p.gender === 'F' ? 'Female' : 'Male'} · <Text style={styles.bloodText}>{p.blood}</Text></Text>
+              </View>
+              <View style={[styles.wardRow, { marginTop: 8 }]}>
+                <BedChip tone={T.surface2}>{p.bed}</BedChip>
+                <WardTypeChip type={ward.type} />
+                <Text style={styles.wardName}>{ward.name}</Text>
+              </View>
             </View>
           </View>
         </View>
         
-        <View style={styles.headerRight}>
-          <View style={styles.wardRow}>
-            <BedChip tone={T.surface2}>{p.bed}</BedChip>
-            <WardTypeChip type={ward.type} />
-            <Text style={styles.wardName}>{ward.name}</Text>
-          </View>
-          <View style={styles.admissionStrip}>
-            <Text style={styles.admissionText}>
-              Admitted <Text style={{ color: T.text }}>{p.admitted}</Text>
-            </Text>
-          </View>
+        <View style={styles.dxStrip}>
+           <Text style={styles.admissionText}>
+             Admitted <Text style={{ color: T.text }}>{p.admitted}</Text> · {p.dx}
+           </Text>
         </View>
-      </View>
-      
-      <View style={styles.dxStrip}>
-         <Text style={styles.admissionText}>{p.dx}</Text>
-      </View>
 
-      {/* Tabs */}
-      <View style={styles.tabBar}>
-        {tabs.map(tb => (
-          <TouchableOpacity 
-            key={tb.id} 
-            onPress={() => setTab(tb.id)} 
-            style={[styles.tab, tab === tb.id && styles.activeTab]}
-          >
-            <Text style={[styles.tabLabel, tab === tb.id && styles.activeTabLabel]}>{tb.label}</Text>
-          </TouchableOpacity>
-        ))}
-      </View>
+        {/* Tabs */}
+        <View style={styles.tabBar}>
+          {tabs.map(tb => (
+            <TouchableOpacity 
+              key={tb.id} 
+              onPress={() => setTab(tb.id)} 
+              style={[styles.tab, tab === tb.id && styles.activeTab]}
+            >
+              <Text style={[styles.tabLabel, tab === tb.id && styles.activeTabLabel]}>{tb.label}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
 
-      {/* Tab Content */}
-      <ScrollView contentContainerStyle={styles.scrollContent}>
-        {tab === 'overview' && <OverviewTab p={p} v={v} onMonitor={onMonitor} />}
-        {tab === 'history' && <HistoryTab p={p} />}
-        {tab === 'instructions' && <InstructionsTab p={p} onWrite={onWriteInstruction} />}
+        {/* Tab Content */}
+        <View style={styles.tabContentWrapper}>
+          {tab === 'overview' && <OverviewTab p={p} v={v} onMonitor={onMonitor} onVitalTrend={onVitalTrend} onConsent={onConsent} />}
+          {tab === 'history' && <HistoryTab p={p} onNote={onNote} />}
+          {tab === 'instructions' && <InstructionsTab p={p} onWrite={onWriteInstruction} />}
+        </View>
       </ScrollView>
     </View>
   );
 };
 
-const OverviewTab = ({ p, v, onMonitor }) => {
+const OverviewTab = ({ p, v, onMonitor, onVitalTrend, onConsent }) => {
   const cards = [
     { k: 'hr', label: 'Heart Rate', value: v.hr, unit: 'bpm', status: vitalStatus('hr', v.hr), range: RANGES.hr.full },
     { k: 'spo2', label: 'SpO₂', value: v.spo2, unit: '%', status: vitalStatus('spo2', v.spo2), range: RANGES.spo2.full },
@@ -129,9 +165,21 @@ const OverviewTab = ({ p, v, onMonitor }) => {
   return (
     <View style={styles.tabContent}>
       <View style={styles.section}>
-        <Text style={styles.subLabel}>Vital Signs</Text>
+        <View style={styles.subLabelRow}>
+          <Text style={styles.subLabel}>Vital Signs</Text>
+          {onVitalTrend && <Text style={styles.subLabelHint}>tap to view trend</Text>}
+        </View>
         <View style={styles.vitalsGrid}>
-          {cards.map(c => <VitalCard key={c.k} {...c} />)}
+          {cards.map(c => (
+            <TouchableOpacity 
+              key={c.k} 
+              onPress={() => onVitalTrend?.(c.k)}
+              disabled={!onVitalTrend}
+              style={styles.vitalCardWrapper}
+            >
+              <VitalCard {...c} />
+            </TouchableOpacity>
+          ))}
           <View style={[styles.statusCard, { borderColor: stat.color + '44' }]}>
             <Text style={styles.vitalLabel}>Status</Text>
             <View style={styles.statusRow}>
@@ -159,6 +207,19 @@ const OverviewTab = ({ p, v, onMonitor }) => {
           <TeamGroup title="Nurses" people={p.nurses} role="Assigned" />
         </View>
       </View>
+
+      {onConsent && (
+        <TouchableOpacity onPress={onConsent} style={styles.consentCard}>
+          <View style={styles.consentIconBox}>
+            <IconFileDoc size={18} color={T.accent} />
+          </View>
+          <View style={{ flex: 1 }}>
+            <Text style={styles.consentTitle}>Consents & Forms</Text>
+            <Text style={styles.consentSub}>View signed documents</Text>
+          </View>
+          <IconChevron size={15} color={T.textFaint} />
+        </TouchableOpacity>
+      )}
     </View>
   );
 };
@@ -181,13 +242,34 @@ const TeamGroup = ({ title, people, role }) => (
   </View>
 );
 
-const HistoryTab = ({ p }) => {
+const HistoryTab = ({ p, onNote }) => {
+  const [filter, setFilter] = useState('All');
+  const filters = ['All', 'Admission', 'Procedure', 'Note', 'Diagnosis'];
   const kindColor = { Admission: T.accent, Procedure: '#8B5CF6', Diagnosis: T.warn, Note: T.textDim };
+  
+  const filtered = filter === 'All' 
+    ? [...p.history].reverse() 
+    : [...p.history].reverse().filter(h => h.kind === filter);
+
   return (
     <View style={styles.tabContent}>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterBar}>
+        {filters.map(f => (
+          <TouchableOpacity 
+            key={f} 
+            onPress={() => setFilter(f)}
+            style={[styles.filterChip, filter === f && styles.activeFilterChip]}
+          >
+            <Text style={[styles.filterLabel, filter === f && styles.activeFilterLabel]}>{f}</Text>
+          </TouchableOpacity>
+        ))}
+      </ScrollView>
+
       <Text style={styles.subLabel}>Medical History</Text>
       <View style={styles.timeline}>
-        {[...p.history].reverse().map((h, i, arr) => (
+        {filtered.length === 0 ? (
+          <Text style={styles.emptyTimelineText}>No {filter.toLowerCase()} entries found.</Text>
+        ) : filtered.map((h, i, arr) => (
           <View key={i} style={[styles.timelineItem, i === arr.length - 1 && { paddingBottom: 0 }]}>
             <View style={styles.timelineLeft}>
               <View style={[styles.timelineDot, { backgroundColor: kindColor[h.kind] || T.textDim }]} />
@@ -204,6 +286,15 @@ const HistoryTab = ({ p }) => {
           </View>
         ))}
       </View>
+
+      {onNote && (
+        <View style={styles.fabRow}>
+          <TouchableOpacity onPress={onNote} style={styles.fab}>
+            <IconPlus size={17} color="#fff" />
+            <Text style={styles.fabText}>Add Note</Text>
+          </TouchableOpacity>
+        </View>
+      )}
     </View>
   );
 };
@@ -239,6 +330,9 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: T.bg,
   },
+  mainScroll: {
+    paddingBottom: 40,
+  },
   controls: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -246,6 +340,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingTop: 10,
     paddingBottom: 4,
+    zIndex: 100,
   },
   controlBtn: {
     width: 34,
@@ -261,22 +356,47 @@ const styles = StyleSheet.create({
     borderRadius: 2,
     backgroundColor: T.border,
   },
+  menuOverlay: {
+    position: 'absolute',
+    top: 46,
+    right: 14,
+    backgroundColor: T.surface,
+    borderWidth: 1,
+    borderColor: T.borderSoft,
+    borderRadius: 12,
+    paddingVertical: 4,
+    minWidth: 160,
+    ...Platform.select({
+      ios: { shadowColor: '#000', shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.45, shadowRadius: 24 },
+      android: { elevation: 8 },
+    }),
+  },
+  menuItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    paddingVertical: 11,
+    paddingHorizontal: 14,
+  },
+  menuItemBorder: {
+    borderTopWidth: 1,
+    borderTopColor: T.borderSoft,
+  },
+  menuItemText: {
+    fontSize: 13,
+    color: T.text,
+  },
   header: {
     paddingHorizontal: 16,
     paddingVertical: 10,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    gap: 13,
   },
   headerMain: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
-  },
-  headerRight: {
-    alignItems: 'flex-end',
-    gap: 6,
+    gap: 13,
   },
   dxStrip: {
     paddingHorizontal: 16,
@@ -321,12 +441,6 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: T.textDim,
   },
-  dot: {
-    width: 3,
-    height: 3,
-    borderRadius: 1.5,
-    backgroundColor: T.textFaint,
-  },
   bloodText: {
     color: T.bad,
     fontFamily: 'JetBrains Mono',
@@ -341,9 +455,6 @@ const styles = StyleSheet.create({
     fontSize: 11,
     color: T.textFaint,
   },
-  admissionStrip: {
-    paddingHorizontal: 0,
-  },
   admissionText: {
     fontSize: 11.5,
     color: T.textDim,
@@ -354,6 +465,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     borderBottomWidth: 1,
     borderBottomColor: T.borderSoft,
+    marginTop: 10,
   },
   tab: {
     flex: 1,
@@ -373,9 +485,8 @@ const styles = StyleSheet.create({
   activeTabLabel: {
     color: T.accent,
   },
-  scrollContent: {
+  tabContentWrapper: {
     padding: 14,
-    paddingBottom: 40,
   },
   tabContent: {
     gap: 16,
@@ -383,23 +494,37 @@ const styles = StyleSheet.create({
   section: {
     gap: 10,
   },
+  subLabelRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 4,
+  },
   subLabel: {
     fontSize: 11,
     fontWeight: '700',
     letterSpacing: 0.8,
     color: T.textDim,
     textTransform: 'uppercase',
-    marginBottom: 4,
+  },
+  subLabelHint: {
+    fontSize: 9.5,
+    color: T.textFaint,
+    textTransform: 'none',
   },
   vitalsGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: 8,
   },
+  vitalCardWrapper: {
+    width: '32%', // Roughly 3 columns
+    minWidth: 100,
+  },
   statusCard: {
     flex: 1,
-    minWidth: '30%',
-    backgroundColor: T.surface, // Reference had gradient, using surface for now
+    minWidth: '32%',
+    backgroundColor: T.surface,
     borderWidth: 1,
     borderRadius: 12,
     padding: 11,
@@ -465,6 +590,60 @@ const styles = StyleSheet.create({
     fontSize: 11,
     color: T.textDim,
   },
+  consentCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    padding: 13,
+    backgroundColor: T.surface,
+    borderWidth: 1,
+    borderColor: T.borderSoft,
+    borderRadius: 12,
+  },
+  consentIconBox: {
+    width: 36,
+    height: 36,
+    borderRadius: 9,
+    backgroundColor: T.accent + '15',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  consentTitle: {
+    fontSize: 13.5,
+    fontWeight: '600',
+    color: T.text,
+  },
+  consentSub: {
+    fontSize: 11,
+    color: T.textDim,
+    marginTop: 1,
+  },
+  filterBar: {
+    marginHorizontal: -14,
+    paddingHorizontal: 14,
+    marginBottom: 12,
+    flexDirection: 'row',
+  },
+  filterChip: {
+    paddingVertical: 4,
+    paddingHorizontal: 11,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: T.border,
+    marginRight: 6,
+  },
+  activeFilterChip: {
+    backgroundColor: T.accent,
+    borderColor: T.accent,
+  },
+  filterLabel: {
+    fontSize: 11.5,
+    fontWeight: '600',
+    color: T.textDim,
+  },
+  activeFilterLabel: {
+    color: '#fff',
+  },
   timeline: {
     paddingLeft: 8,
   },
@@ -520,6 +699,37 @@ const styles = StyleSheet.create({
     fontSize: 11,
     color: T.textFaint,
     marginTop: 4,
+  },
+  emptyTimelineText: {
+    textAlign: 'center',
+    color: T.textDim,
+    fontSize: 12.5,
+    paddingVertical: 24,
+  },
+  fabRow: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    marginTop: 20,
+    paddingTop: 8,
+  },
+  fab: {
+    height: 44,
+    paddingHorizontal: 18,
+    borderRadius: 22,
+    backgroundColor: T.accent,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.36,
+    shadowRadius: 16,
+    elevation: 4,
+  },
+  fabText: {
+    fontSize: 13.5,
+    fontWeight: '700',
+    color: '#fff',
   },
   emptyState: {
     alignItems: 'center',

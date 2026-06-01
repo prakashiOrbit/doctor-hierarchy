@@ -1,10 +1,12 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
   ScrollView,
   StyleSheet,
   Platform,
+  TouchableOpacity,
+  TextInput,
 } from 'react-native';
 import { T } from '../theme/tokens';
 import { PATIENTS, WARDS } from '../data/mockData';
@@ -17,26 +19,77 @@ import {
   IconClock,
   IconChevron,
   IconLogout,
+  IconPencil,
 } from '../components/Icons';
 
-export const ProfileScreen = ({ onLogout }) => {
+export const ProfileScreen = ({ onLogout, onNavigate }) => {
+  const [editing, setEditing] = useState(false);
+  const [name, setName] = useState('Dr. R. Shah');
+  const [role, setRole] = useState('Consultant Intensivist');
+  const [gmc, setGmc] = useState('GMC 7240118 · ICU-A');
+
   const rows = [
-    { icon: <IconBell size={18} />, label: 'Notifications', val: 'Critical only' },
-    { icon: <IconShield size={18} />, label: 'Two-factor auth', val: 'On' },
-    { icon: <IconActivity size={18} />, label: 'Default waveform', val: 'ECG II' },
-    { icon: <IconClock size={18} />, label: 'Shift', val: 'Day · 08:00–20:00' },
+    { icon: <IconBell size={18} />, label: 'Notifications', val: 'Critical only', route: 'notif-prefs' },
+    { icon: <IconShield size={18} />, label: 'Two-factor auth', val: 'On', route: '2fa-settings' },
+    { icon: <IconActivity size={18} />, label: 'Default waveform', val: 'ECG II', route: null },
+    { icon: <IconClock size={18} />, label: 'Shift', val: 'Day · 08:00–20:00', route: 'oncall' },
   ];
 
   return (
     <ScrollView contentContainerStyle={styles.scrollContent} style={styles.container}>
       {/* Doctor ID Card */}
       <View style={styles.profileCard}>
-        <Avatar initials="RS" color={T.accent} size={56} />
-        <View style={styles.profileInfo}>
-          <Text style={styles.doctorName}>Dr. R. Shah</Text>
-          <Text style={styles.doctorRole}>Consultant Intensivist</Text>
-          <Text style={styles.doctorMeta}>GMC 7240118 · ICU-A</Text>
+        <TouchableOpacity 
+          onPress={() => setEditing(!editing)} 
+          style={[styles.editToggle, editing && styles.editToggleActive]}
+        >
+          <IconPencil size={15} color={editing ? T.accent : T.textDim} />
+        </TouchableOpacity>
+        
+        <View style={styles.profileHeaderMain}>
+          <Avatar initials="RS" color={T.accent} size={56} />
+          <View style={styles.profileInfo}>
+            {editing ? (
+              <View style={styles.editForm}>
+                <TextInput 
+                  value={name} 
+                  onChangeText={setName} 
+                  style={styles.editInputName} 
+                  placeholder="Name"
+                />
+                <TextInput 
+                  value={role} 
+                  onChangeText={setRole} 
+                  style={styles.editInputRole} 
+                  placeholder="Role"
+                />
+                <TextInput 
+                  value={gmc} 
+                  onChangeText={setGmc} 
+                  style={styles.editInputGmc} 
+                  placeholder="GMC / Unit"
+                />
+              </View>
+            ) : (
+              <>
+                <Text style={styles.doctorName}>{name}</Text>
+                <Text style={styles.doctorRole}>{role}</Text>
+                <Text style={styles.doctorMeta}>{gmc}</Text>
+              </>
+            )}
+          </View>
         </View>
+
+        {editing && (
+          <View style={styles.editActions}>
+            <TouchableOpacity style={styles.editCancelBtn} onPress={() => setEditing(false)}>
+              <Text style={styles.editCancelText}>Cancel</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.editSaveBtn} onPress={() => setEditing(false)}>
+              <Text style={styles.editSaveText}>Save Changes</Text>
+            </TouchableOpacity>
+          </View>
+        )}
       </View>
 
       {/* Quick Stats */}
@@ -49,12 +102,16 @@ export const ProfileScreen = ({ onLogout }) => {
       {/* Settings Rows */}
       <View style={styles.settingsList}>
         {rows.map((r, i) => (
-          <View key={i} style={[styles.settingRow, i === 0 && { borderTopWidth: 0 }]}>
+          <TouchableOpacity 
+            key={i} 
+            onPress={() => r.route && onNavigate?.(r.route)}
+            style={[styles.settingRow, i === 0 && { borderTopWidth: 0 }]}
+          >
             <View style={styles.settingIcon}>{r.icon}</View>
             <Text style={styles.settingLabel}>{r.label}</Text>
             <Text style={styles.settingVal}>{r.val}</Text>
             <IconChevron size={15} color={T.textFaint} />
-          </View>
+          </TouchableOpacity>
         ))}
       </View>
 
@@ -87,17 +144,38 @@ const styles = StyleSheet.create({
     gap: 16,
   },
   profileCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 14,
-    backgroundColor: T.surface, // Reference had a gradient, using surface for consistency
+    backgroundColor: T.surface,
     borderWidth: 1,
     borderColor: T.borderSoft,
     borderRadius: 16,
     padding: 16,
+    position: 'relative',
+  },
+  profileHeaderMain: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 14,
   },
   profileInfo: {
     flex: 1,
+    paddingRight: 32,
+  },
+  editToggle: {
+    position: 'absolute',
+    top: 12,
+    right: 12,
+    width: 32,
+    height: 32,
+    borderRadius: 9,
+    borderWidth: 1,
+    borderColor: T.border,
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 10,
+  },
+  editToggleActive: {
+    borderColor: T.accent,
+    backgroundColor: T.accent + '15',
   },
   doctorName: {
     fontSize: 18,
@@ -114,6 +192,73 @@ const styles = StyleSheet.create({
     color: T.textFaint,
     fontFamily: 'JetBrains Mono',
     marginTop: 4,
+  },
+  editForm: {
+    gap: 6,
+  },
+  editInputName: {
+    backgroundColor: T.bg,
+    borderWidth: 1,
+    borderColor: T.accent,
+    borderRadius: 7,
+    color: T.text,
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+    fontSize: 15,
+    fontWeight: '700',
+  },
+  editInputRole: {
+    backgroundColor: T.bg,
+    borderWidth: 1,
+    borderColor: T.borderSoft,
+    borderRadius: 7,
+    color: T.textDim,
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+    fontSize: 12,
+  },
+  editInputGmc: {
+    backgroundColor: T.bg,
+    borderWidth: 1,
+    borderColor: T.borderSoft,
+    borderRadius: 7,
+    color: T.textFaint,
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+    fontSize: 10.5,
+    fontFamily: 'JetBrains Mono',
+  },
+  editActions: {
+    flexDirection: 'row',
+    gap: 8,
+    marginTop: 14,
+  },
+  editCancelBtn: {
+    flex: 1,
+    height: 38,
+    borderRadius: 9,
+    borderWidth: 1,
+    borderColor: T.border,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  editCancelText: {
+    color: T.textDim,
+    fontSize: 13,
+    fontWeight: '600',
+  },
+  editSaveBtn: {
+    flex: 1,
+    height: 38,
+    borderRadius: 9,
+    backgroundColor: T.accent,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  editSaveText: {
+    color: '#fff',
+    fontSize: 13,
+    fontWeight: '600',
   },
   statsGrid: {
     flexDirection: 'row',

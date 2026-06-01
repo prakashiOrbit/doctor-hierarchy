@@ -10,7 +10,17 @@ import { HomeScreen } from './src/screens/HomeScreen';
 import { PatientsScreen } from './src/screens/PatientsScreen';
 import { AlarmsScreen } from './src/screens/AlarmsScreen';
 import { ProfileScreen } from './src/screens/ProfileScreen';
+import { NotificationsScreen } from './src/screens/NotificationsScreen';
+import { ProgressNoteScreen } from './src/screens/ProgressNoteScreen';
+import { VitalsTrendScreen } from './src/screens/VitalsTrendScreen';
+import { OnCallScreen } from './src/screens/OnCallScreen';
+import { WardRoundsScreen } from './src/screens/WardRoundsScreen';
+import { ReferralScreen } from './src/screens/ReferralScreen';
+import { ConsentViewerScreen } from './src/screens/ConsentViewerScreen';
+import { NotifPrefsScreen } from './src/screens/NotifPrefsScreen';
+import { TwoFASettingsScreen } from './src/screens/TwoFASettingsScreen';
 import { PatientDetailScreen } from './src/screens/PatientDetailScreen';
+import { QRScanOverlay } from './src/components/QRScanOverlay';
 import { MonitoringScreen } from './src/screens/MonitoringScreen';
 import { InstructionsScreen } from './src/screens/InstructionsScreen';
 import { InstructionPreviewScreen } from './src/screens/InstructionPreviewScreen';
@@ -114,6 +124,10 @@ function MainApp({ onLogoutPhase, showToast }) {
             onClose={pop}
             onMonitor={() => push('monitoring', { patient: top.data.patient })}
             onWriteInstruction={() => push('instructions', { patient: top.data.patient })}
+            onVitalTrend={(vkey) => push('vitals-trend', { patient: top.data.patient, vkey })}
+            onNote={() => push('note', { patient: top.data.patient })}
+            onConsent={() => push('consent', { patient: top.data.patient })}
+            onReferral={() => push('referral', { patient: top.data.patient })}
           />
         );
       case 'monitoring':
@@ -129,10 +143,71 @@ function MainApp({ onLogoutPhase, showToast }) {
         return (
           <InstructionsScreen 
             patient={top.data.patient} 
-            onClose={pop}
+            onClose={pop} 
             onPreview={(draft) => push('preview', { patient: top.data.patient, draft })}
             showToast={showToast}
           />
+        );
+      case 'notifications':
+        return (
+          <NotificationsScreen onBack={pop} />
+        );
+      case 'note':
+        return (
+          <ProgressNoteScreen 
+            patient={top.data.patient} 
+            onClose={pop} 
+            onSave={() => { pop(); showToast('Progress note saved', 'good'); }}
+          />
+        );
+      case 'vitals-trend':
+        return (
+          <VitalsTrendScreen 
+            patient={top.data.patient} 
+            vkey={top.data.vkey} 
+            onBack={pop} 
+          />
+        );
+      case 'oncall':
+        return (
+          <OnCallScreen onBack={pop} />
+        );
+      case 'ward-rounds':
+        return (
+          <WardRoundsScreen 
+            onBack={pop} 
+            onPatient={p => push('patient', { patient: p })}
+          />
+        );
+      case 'qr-scan':
+        return (
+          <QRScanOverlay 
+            onClose={pop} 
+            onScan={p => { pop(); push('patient', { patient: p }); }}
+          />
+        );
+      case 'referral':
+        return (
+          <ReferralScreen 
+            patient={top.data.patient} 
+            onClose={pop} 
+            onSave={() => { pop(); showToast('Referral sent successfully', 'good'); }}
+          />
+        );
+      case 'consent':
+        return (
+          <ConsentViewerScreen 
+            patient={top.data.patient} 
+            onBack={pop} 
+          />
+        );
+      case 'notif-prefs':
+        return (
+          <NotifPrefsScreen onBack={pop} />
+        );
+      case '2fa-settings':
+        return (
+          <TwoFASettingsScreen onBack={pop} />
         );
       case 'preview':
         return (
@@ -156,8 +231,8 @@ function MainApp({ onLogoutPhase, showToast }) {
             title={tt.title} subtitle={tt.sub}
             trailing={
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 2 }}>
-                <TouchableOpacity onPress={() => setTab('alarms')} style={styles.headerAction}>
-                  <IconBell size={20} color={tab === 'alarms' ? T.accent : T.textDim} />
+                <TouchableOpacity onPress={() => push('notifications')} style={styles.headerAction}>
+                  <IconBell size={20} color={T.textDim} />
                   {alarms.length > 0 && (
                     <View style={styles.alarmBadge}><Text style={styles.alarmBadgeText}>{alarms.length}</Text></View>
                   )}
@@ -174,11 +249,29 @@ function MainApp({ onLogoutPhase, showToast }) {
                 alarms={alarms} 
                 onAlarm={a => push('alarm', { alarm: a })} 
                 onPatient={p => push('patient', { patient: p })} 
+                onOnCall={() => push('oncall')}
+                onRounds={() => push('ward-rounds')}
               />
             )}
-            {tab === 'patients' && <PatientsScreen onPatient={p => push('patient', { patient: p })} />}
-            {tab === 'alarms' && <AlarmsScreen alarms={alarms} onAlarm={a => push('alarm', { alarm: a })} />}
-            {tab === 'me' && <ProfileScreen onLogout={() => setLogoutOpen(true)} />}
+            {tab === 'patients' && (
+              <PatientsScreen 
+                onPatient={p => push('patient', { patient: p })} 
+                onQRScan={() => push('qr-scan')}
+              />
+            )}
+            {tab === 'alarms' && (
+              <AlarmsScreen 
+                alarms={alarms} 
+                onAlarm={a => push('alarm', { alarm: a })} 
+                onBulkAcknowledge={(ids) => showToast(`${ids.length} alarms acknowledged`, 'good')}
+              />
+            )}
+            {tab === 'me' && (
+              <ProfileScreen 
+                onLogout={() => setLogoutOpen(true)} 
+                onNavigate={(route) => push(route)}
+              />
+            )}
           </View>
           <BottomNav items={NAV_ITEMS} active={tab} onChange={setTab} />
         </>

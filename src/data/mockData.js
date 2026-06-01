@@ -220,21 +220,126 @@ function buildTrend() {
 export const ALARM_TREND = buildTrend();
 
 // Mini 30-min vitals trend for alarm detail (shows the drop/spike)
-export function alarmTrendSeries(alarm) {
+// ─── supplemental data: notifications, consents, rounds, shifts, referrals.
+
+export const NOTIFICATIONS_DATA = [
+  { id: 'n1', type: 'alarm',     title: 'Critical: SpO₂ low',          body: 'Eleanor Whitfield · BED-12 · SpO₂ 88% — immediate review required.', ts: '09:14', day: 'today',     read: false },
+  { id: 'n2', type: 'escalation',title: 'Nurse escalation',             body: 'Priya Nair flagged Marcus Doyle — sudden deterioration in level of consciousness.', ts: '08:45', day: 'today', read: false },
+  { id: 'n3', type: 'ack',       title: 'Instruction acknowledged',     body: 'Tom Hale confirmed: Titrate FiO₂ instruction for Eleanor Whitfield.', ts: '07:32', day: 'today',     read: true  },
+  { id: 'n4', type: 'alarm',     title: 'HIGH: HR resolved',            body: 'Sofia Marchetti · BED-03 · HR returned to within normal range.',     ts: '06:10', day: 'today',     read: true  },
+  { id: 'n5', type: 'system',    title: 'Shift handover reminder',      body: 'Your day shift ends at 20:00. Please complete round notes before handover.', ts: '18:00', day: 'yesterday', read: true },
+  { id: 'n6', type: 'alarm',     title: 'MEDIUM: Pyrexia',              body: 'Marcus Doyle · BED-08 · Temp 37.9 °C — monitor and reassess.',       ts: '14:22', day: 'yesterday', read: true  },
+  { id: 'n7', type: 'ack',       title: 'Instruction completed',        body: 'Daniel Ross confirmed: Step-down antibiotics completed — Amara Okafor.', ts: '10:05', day: 'yesterday', read: true },
+  { id: 'n8', type: 'system',    title: 'New protocol update',          body: 'ICU Sepsis Bundle v3.2 published. Review required before next shift.', ts: '29 May', day: 'earlier',   read: true  },
+  { id: 'n9', type: 'escalation',title: 'Nurse escalation',             body: 'Grace Lin escalated Hiroshi Tanaka — chest pain, requesting urgent review.', ts: '28 May', day: 'earlier', read: true },
+];
+
+export const NOTIF_TYPE_META = {
+  alarm:      { color: '#EF4444', bg: 'rgba(239,68,68,.13)',   iconKey: 'bell'    },
+  escalation: { color: '#F97316', bg: 'rgba(249,115,22,.13)',  iconKey: 'shieldup'},
+  system:     { color: '#3B82F6', bg: 'rgba(59,130,246,.13)',  iconKey: 'info'    },
+  ack:        { color: '#10B981', bg: 'rgba(16,185,129,.13)',  iconKey: 'check'   },
+};
+
+export const NOTIF_DAYS = [
+  { key: 'today',     label: 'Today'     },
+  { key: 'yesterday', label: 'Yesterday' },
+  { key: 'earlier',   label: 'Earlier'   },
+];
+
+// ─── Consents ────────────────────────────────────────────────
+export const CONSENT_TPLS = {
+  p1: [
+    { id:'c1p1', type:'ICU Admission Consent',         status:'SIGNED',  signedBy:'James Whitfield (NOK)', date:'14 May 2026', witness:'Dr. R. Shah', text:'I, the undersigned, as next-of-kin, consent to the admission and treatment of the patient in the Intensive Care Unit. I understand the nature and purpose of intensive care treatment, including the potential use of mechanical ventilation, invasive monitoring, and other life-sustaining therapies. Risks and benefits have been explained to me.' },
+    { id:'c2p1', type:'Procedure Consent — Central Line', status:'SIGNED', signedBy:'James Whitfield (NOK)', date:'15 May 2026', witness:'N. Bello', text:'Consent obtained for insertion of central venous catheter via right internal jugular approach. Risks discussed including pneumothorax, arterial puncture, line infection, and thrombosis. Alternatives explained.' },
+    { id:'c3p1', type:'Blood Products Consent',        status:'SIGNED',  signedBy:'James Whitfield (NOK)', date:'14 May 2026', witness:'Dr. R. Shah', text:'Consent given for administration of blood products including packed red cells, fresh frozen plasma, and platelets as clinically indicated during admission.' },
+  ],
+  p2: [
+    { id:'c1p2', type:'Surgical Consent — Laparotomy', status:'SIGNED',  signedBy:'Marcus Doyle',    date:'20 May 2026', witness:'Dr. J. Owusu', text:'Patient consented to emergency exploratory laparotomy. Risks of surgery, general anaesthesia, and post-operative complications including anastomotic leak, wound infection, and prolonged ICU stay were discussed at length.' },
+    { id:'c2p2', type:'Anaesthesia Consent',           status:'SIGNED',  signedBy:'Marcus Doyle',    date:'20 May 2026', witness:'Dr. J. Owusu', text:'General anaesthesia consent obtained. Risks including aspiration, awareness, PONV, and respiratory complications discussed.' },
+  ],
+  p3: [
+    { id:'c1p3', type:'CCU Admission Consent',         status:'SIGNED',  signedBy:'Sofia Marchetti', date:'23 May 2026', witness:'Dr. L. Castro', text:'Consent for CCU admission and continuous cardiac monitoring obtained.' },
+    { id:'c2p3', type:'Pacing Consent — Permanent PPM', status:'PENDING', signedBy: null, date: null, witness: null, text:'Consent for implantation of permanent pacemaker (dual-chamber, rate-responsive) pending patient signature. Procedure scheduled for 2 Jun 2026.' },
+  ],
+  p4: [
+    { id:'c1p4', type:'Coronary Angiography Consent',  status:'SIGNED',  signedBy:'Hiroshi Tanaka',  date:'22 May 2026', witness:'Dr. L. Castro', text:'Consent obtained for diagnostic and interventional coronary angiography. Risks of contrast nephropathy, arrhythmia, and emergency CABG discussed.' },
+    { id:'c2p4', type:'Dual Antiplatelet Therapy',     status:'SIGNED',  signedBy:'Hiroshi Tanaka',  date:'21 May 2026', witness:'Dr. L. Castro', text:'Patient consented to dual antiplatelet therapy (aspirin + ticagrelor) and understands associated bleeding risks and necessary precautions.' },
+  ],
+  p5: [
+    { id:'c1p5', type:'Treatment Consent',             status:'SIGNED',  signedBy:'Amara Okafor',    date:'25 May 2026', witness:'Dr. J. Owusu', text:'Consent for IV antibiotics and general ward management of community-acquired pneumonia.' },
+  ],
+  p6: [
+    { id:'c1p6', type:'Treatment Consent',             status:'SIGNED',  signedBy:'Robert Niemann',  date:'19 May 2026', witness:'Dr. J. Owusu', text:'Consent for corticosteroids, nebulisers, and supplemental oxygen therapy for COPD exacerbation.' },
+    { id:'c2p6', type:'NIV Consent',                   status:'PENDING', signedBy: null, date: null, witness: null, text:'Consent for non-invasive ventilation (BiPAP) pending clinical deterioration assessment.' },
+  ],
+  p7: [
+    { id:'c1p7', type:'Surgical Consent — Cholecystectomy', status:'SIGNED', signedBy:'Lena Vasquez', date:'26 May 2026', witness:'Dr. J. Owusu', text:'Consent for laparoscopic cholecystectomy obtained. Risks of conversion to open procedure, bile duct injury, and haemorrhage discussed.' },
+  ],
+};
+export function consentsForPatient(patientId) { return CONSENT_TPLS[patientId] || []; }
+
+// ─── Shifts ───────────────────────────────────────────────────
+export const SHIFTS_DATA = [
+  { date: '01 Jun', name: 'Day Shift',   start: '08:00', end: '20:00', wards: ['ICU-A','CCU-1'],           status: 'oncall',  hours: null },
+  { date: '31 May', name: 'Day Shift',   start: '08:00', end: '20:00', wards: ['ICU-A','CCU-1'],           status: 'oncall',  hours: 12 },
+  { date: '30 May', name: 'Day Shift',   start: '08:00', end: '20:00', wards: ['ICU-A'],                   status: 'oncall',  hours: 12 },
+  { date: '29 May', name: 'Rest Day',    start: '',      end: '',      wards: [],                           status: 'offduty', hours: 0  },
+  { date: '28 May', name: 'Night Shift', start: '20:00', end: '08:00', wards: ['ICU-A','CCU-1','GEN-3W'], status: 'oncall',  hours: 12 },
+  { date: '27 May', name: 'Rest Day',    start: '',      end: '',      wards: [],                           status: 'offduty', hours: 0  },
+  { date: '26 May', name: 'Day Shift',   start: '08:00', end: '20:00', wards: ['ICU-A','CCU-1'],           status: 'oncall',  hours: 12 },
+];
+
+// ─── Round items ─────────────────────────────────────────────
+export const TO_CHECK_ITEMS = {
+  p1: ['Review ABG results', 'Check SpO₂ trend', 'Weaning assessment due'],
+  p2: ['Post-op bloods due', 'Encourage mobilisation', 'Ileus resolved?'],
+  p3: ['Pre-op NPO confirmed', 'PPM consent pending', 'ECG trace review'],
+  p4: ['Post-PCI troponin', 'Antiplatelet compliance', 'Echo review'],
+  p5: ['Afebrile check', 'Discharge planning', 'Oral ABx tolerance'],
+  p6: ['SpO₂ on room air', 'Steroid wean plan', 'Physio update'],
+  p7: ['Wound check', 'Pain score', 'Diet tolerance'],
+};
+const DAYS_ADMITTED_MAP = { p1: 18, p2: 12, p3: 9, p4: 11, p5: 7, p6: 13, p7: 6 };
+export const INITIAL_ROUNDS = PATIENTS.map(p => ({
+  patientId: p.id, checked: false,
+  priority: p.status === 'critical' ? 'urgent' : p.status === 'watch' ? 'routine' : 'ok',
+  dayAdmitted: DAYS_ADMITTED_MAP[p.id] || 1,
+  toCheck: TO_CHECK_ITEMS[p.id] || [],
+}));
+
+// ─── Incoming referrals ───────────────────────────────────────
+export const REFERRALS_INCOMING_DATA = [
+  { id:'ri1', fromDoc:'Dr. J. Owusu',   fromSpecialty:'Gen Medicine', patientId:'p5', urgency:'urgent',  reason:'CAP not improving as expected after 48h of IV antibiotics. Requesting respiratory medicine review — possible empyema or resistant organism?', received:'2h ago',    status:'pending' },
+  { id:'ri2', fromDoc:'Dr. L. Castro',  fromSpecialty:'Cardiology',   patientId:'p4', urgency:'routine', reason:'Post-NSTEMI · day 3. Requesting diabetes/endocrine review — HbA1c 9.2%, elevated fasting glucose. Consider initiating antidiabetic therapy.', received:'Yesterday', status:'pending' },
+];
+
+// ─── Vital trend data generator ───────────────────────────────
+export function genVitalTrend(baseVal, hours, noise, lo, hi) {
   const pts = [];
-  const target = typeof alarm.value === 'number' ? alarm.value : 120;
-  const baseline = alarm.dir === 'down' ? target + alarm.deviation + (alarm.param === 'HR' ? 30 : 8)
-                                        : target - alarm.deviation - (alarm.param === 'HR' ? 24 : 6);
-  for (let i = 0; i < 30; i++) {
-    const t = i / 29;
-    // stable baseline, then deviation event in last third
-    let v = baseline + (Math.random() - 0.5) * (alarm.param === 'HR' ? 4 : 1.2);
-    if (t > 0.62) {
-      const k = (t - 0.62) / 0.38;
-      v = baseline + (target - baseline) * Math.min(1, k * 1.15) + (Math.random() - 0.5) * 2;
-    }
-    pts.push(+v.toFixed(1));
+  const now = Date.now();
+  const step = (hours * 3600000) / 40;
+  for (let i = 0; i <= 40; i++) {
+    const ts = new Date(now - (40 - i) * step);
+    const t = i / 40;
+    const drift = Math.sin(t * Math.PI * 3 + 0.5) * noise * 0.6;
+    const spike = i === 28 ? (baseVal < lo ? -noise * 1.3 : noise * 1.3) : 0;
+    const v = Math.max(lo - noise * 0.5, Math.min(hi + noise * 0.5, baseVal + drift + spike + (Math.random() - 0.5) * noise * 0.35));
+    const hh = ts.getHours().toString().padStart(2, '0');
+    const mm = ts.getMinutes().toString().padStart(2, '0');
+    pts.push({ v: +(v.toFixed(baseVal < 10 ? 1 : 0)), label: `${hh}:${mm}` });
   }
-  pts[29] = target;
   return pts;
+}
+
+export function vitalTrendConfig(vkey, patient) {
+  const v = patient.vitals;
+  const map = {
+    hr:   { base: v.hr,      noise: 8,   lo: 60,   hi: 100,  color: '#22D38B', unit: 'bpm',  label: 'Heart Rate',    paramShort: 'HR'   },
+    spo2: { base: v.spo2,    noise: 2.5, lo: 95,   hi: 100,  color: '#22D3EE', unit: '%',    label: 'SpO₂',          paramShort: 'SpO₂' },
+    rr:   { base: v.rr,      noise: 3,   lo: 12,   hi: 20,   color: '#60A5FA', unit: 'brpm', label: 'Resp Rate',     paramShort: 'RR'   },
+    temp: { base: v.temp,    noise: 0.4, lo: 36.1, hi: 37.8, color: '#F59E0B', unit: '°C',   label: 'Temperature',   paramShort: 'TEMP' },
+    nibp: { base: v.nibpSys, noise: 10,  lo: 90,   hi: 140,  color: '#A78BFA', unit: 'mmHg', label: 'NIBP Systolic', paramShort: 'NIBP' },
+  };
+  return map[vkey] || map.hr;
 }

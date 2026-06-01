@@ -72,6 +72,58 @@ export const IconShield = (p) => (
   </I>
 );
 
+export const IconShieldUp = (p) => (
+  <I {...p}>
+    <Path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6l8-3z" />
+    <Path d="M12 8v6M9 11l3-3 3 3" />
+  </I>
+);
+
+export const IconInfoCircle = (p) => (
+  <I {...p}>
+    <Circle cx="12" cy="12" r="10" />
+    <Path d="M12 16v-4M12 8h.01" />
+  </I>
+);
+
+export const IconBellOff = (p) => (
+  <I {...p}>
+    <Path d="M13.73 21a2 2 0 0 1-3.46 0" />
+    <Path d="M18.63 13A17.89 17.89 0 0 1 18 8" />
+    <Path d="M6.26 6.26A5.86 5.86 0 0 0 6 8c0 7-3 9-3 9h13.73" />
+    <Path d="M2 2l20 20" />
+  </I>
+);
+
+export const IconCalendar = (p) => (
+  <I {...p}>
+    <Rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+    <Path d="M16 2v4M8 2v4M3 10h18" />
+  </I>
+);
+
+export const IconDoor = (p) => (
+  <I {...p}>
+    <Path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14 2z" />
+    <Path d="M14 2v6h6M8 13h8M8 17h8" />
+  </I>
+);
+
+export const IconSignature = (p) => (
+  <I {...p}>
+    <Path d="M20 14.66V20a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h5.34" />
+    <Path d="M18 2l4 4-10 10H8v-4L18 2z" />
+  </I>
+);
+
+export const IconDownload = (p) => (
+  <I {...p}>
+    <Path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+    <Path d="M7 10l5 5 5-5" />
+    <Path d="M12 15V3" />
+  </I>
+);
+
 export const IconMail = (p) => (
   <I {...p}>
     <Rect x="3" y="5" width="18" height="14" rx="2" />
@@ -187,6 +239,14 @@ export const IconClipboard = (p) => (
   </I>
 );
 
+export const IconClipboardList = (p) => (
+  <I {...p}>
+    <Path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
+    <Path d="M9 14l2 2 4-4" />
+    <Rect x="8" y="2" width="8" height="4" rx="1" />
+  </I>
+);
+
 export const IconPlus = (p) => (
   <I {...p}>
     <Path d="M12 5v14M5 12h14" />
@@ -250,8 +310,45 @@ export const IconShare = (p) => (
   </I>
 );
 
-export const IconHeart = (p) => (
+export const IconHandshake = (p) => (
   <I {...p}>
-    <Path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+    <Path d="M17 11h1a3 3 0 0 1 0 6h-1" />
+    <Path d="M9 12c.66 0 1.33.66 2 1.33.66-.67 1.33-1.33 2-1.33s1.33.66 2 1.33c.66-.67 1.33-1.33 2-1.33s1.33.66 2 1.33" />
+    <Path d="M11 20H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
+  </I>
+);
+
+export const IconFileDoc = (p) => (
+  <I {...p}>
+    <Path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
+    <Path d="M14 2v6h6M16 13H8M16 17H8M10 9H8" />
+  </I>
+);
+
+export const IconNotepad = (p) => (
+  <I {...p}>
+    <Rect x="4" y="4" width="16" height="16" rx="2" />
+    <Path d="M8 2v4M16 2v4M4 10h16M8 14h8M8 18h5" />
+  </I>
+);
+
+export const IconFilter = (p) => (
+  <I {...p}>
+    <Path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z" />
+  </I>
+);
+
+export const IconQR = (p) => (
+  <I {...p}>
+    <Path d="M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h3M21 14v3M14 21h7M17 17h4" />
+    <Rect x="5" y="5" width="3" height="3" />
+    <Rect x="16" y="5" width="3" height="3" />
+    <Rect x="5" y="16" width="3" height="3" />
+  </I>
+);
+
+export const IconPencil = (p) => (
+  <I {...p}>
+    <Path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z" />
   </I>
 );

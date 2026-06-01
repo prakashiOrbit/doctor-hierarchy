@@ -8,7 +8,7 @@ import {
   Platform,
 } from 'react-native';
 import { T } from '../theme/tokens';
-import { WARV2_BG = '#050810', SEV, WARDS, RANGES, ALARM_TREND, vitalStatus } from '../data/mockData';
+import { SEV, WARDS, RANGES, ALARM_TREND, vitalStatus } from '../data/mockData';
 import {
   LiveDot,
   BedChip,

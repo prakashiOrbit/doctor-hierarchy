@@ -102,13 +102,6 @@ export const IconCalendar = (p) => (
   </I>
 );
 
-export const IconDoor = (p) => (
-  <I {...p}>
-    <Path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14 2z" />
-    <Path d="M14 2v6h6M8 13h8M8 17h8" />
-  </I>
-);
-
 export const IconSignature = (p) => (
   <I {...p}>
     <Path d="M20 14.66V20a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h5.34" />

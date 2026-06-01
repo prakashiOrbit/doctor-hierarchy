@@ -111,7 +111,7 @@ export const AlarmsScreen = ({ alarms, onAlarm, onBulkAcknowledge }) => {
                       >
                         <AlarmCard 
                           alarm={a} 
-                          patient={patientById(a.patientId)} 
+                          patient={typeof patientById === 'function' ? patientById(a.patientId) : null} 
                           onClick={() => selectMode ? toggleSelect(a.id) : onAlarm(a)} 
                         />
                         {selectMode && (
@@ -465,4 +465,6 @@ const styles = StyleSheet.create({
   btnTextPrimary: {
     color: '#fff',
   },
+});
+ },
 });

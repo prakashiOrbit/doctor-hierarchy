@@ -93,8 +93,9 @@ export const WardTypeChip = ({ type }) => {
 export const AlarmCard = ({ alarm, onClick, patient }) => {
   const s = SEV[alarm.severity] || SEV.low;
   const p = patient;
+  if (!p) return null;
   const critical = alarm.severity === 'critical';
-  const ward = WARDS.find(w => w.id === p.wardId);
+  const ward = (WARDS || []).find(w => w.id === p.wardId);
 
   return (
     <TouchableOpacity onPress={onClick} style={styles.alarmCard}>
@@ -107,7 +108,7 @@ export const AlarmCard = ({ alarm, onClick, patient }) => {
               <BedChip>{p.bed}</BedChip>
             </View>
             <Text style={styles.alarmPatientSub} numberOfLines={1}>
-              {ward?.name} · {p.dx.split('·')[0].trim()}
+              {ward?.name} · {p.dx?.split('·')[0].trim()}
             </Text>
           </View>
           <PriorityBadge severity={alarm.severity} size="sm" />
@@ -129,9 +130,10 @@ export const AlarmCard = ({ alarm, onClick, patient }) => {
 // ─── Patient row ─────────────────────────────────────────────
 export const PatientRow = ({ patient, onClick }) => {
   const p = patient;
+  if (!p) return null;
   return (
     <TouchableOpacity onPress={onClick} style={styles.patientRow}>
-      <Avatar initials={initials(p.name)} color={nameColor(p.name)} size={38} />
+      <Avatar initials={typeof initials === 'function' ? initials(p.name) : ''} color={typeof nameColor === 'function' ? nameColor(p.name) : '#ccc'} size={38} />
       <View style={{ flex: 1 }}>
         <View style={styles.patientRowHeader}>
           <Text style={styles.patientName} numberOfLines={1}>{p.name}</Text>

@@ -343,3 +343,23 @@ export function vitalTrendConfig(vkey, patient) {
   };
   return map[vkey] || map.hr;
 }
+
+export function alarmTrendSeries(alarm) {
+  const pts = [];
+  const target = typeof alarm.value === 'number' ? alarm.value : 120;
+  const baseline = alarm.dir === 'down' ? target + alarm.deviation + (alarm.param === 'HR' ? 30 : 8)
+                                        : target - alarm.deviation - (alarm.param === 'HR' ? 24 : 6);
+  for (let i = 0; i < 30; i++) {
+    const t = i / 29;
+    // stable baseline, then deviation event in last third
+    let v = baseline + (Math.random() - 0.5) * (alarm.param === 'HR' ? 4 : 1.2);
+    if (t > 0.62) {
+      const k = (t - 0.62) / 0.38;
+      v = baseline + (target - baseline) * Math.min(1, k * 1.15) + (Math.random() - 0.5) * 2;
+    }
+    pts.push(+v.toFixed(1));
+  }
+  pts[29] = target;
+  return pts;
+}
+

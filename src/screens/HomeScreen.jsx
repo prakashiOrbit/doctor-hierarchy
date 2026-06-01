@@ -140,11 +140,11 @@ export const HomeScreen = ({ alarms, onAlarm, onPatient, onOnCall, onRounds }) =
           </View>
           <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.columnScroll}>
             <View style={styles.wardList}>
-              {WARDS.map(w => (
+              {(WARDS || []).map(w => (
                 <WardAccordion 
                   key={w.id} 
                   ward={w} 
-                  patients={patientsInWard(w.id)}
+                  patients={typeof patientsInWard === 'function' ? patientsInWard(w.id) : []}
                   defaultOpen={w.type !== 'GENERAL'} 
                   onPatient={onPatient}
                 />

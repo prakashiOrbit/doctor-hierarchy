@@ -36,11 +36,22 @@ const PARAM_NAMES = {
 };
 
 export const AlarmDetailScreen = ({ alarm, onClose, onViewPatient, onWriteInstruction, onAcknowledge, showToast }) => {
-  const s = SEV[alarm.severity];
-  const p = patientById(alarm.patientId);
-  const ward = WARDS.find(w => w.id === p.wardId);
+  if (!alarm) return null;
+
+  const s = SEV[alarm.severity] || SEV.low;
+  const p = typeof patientById === 'function' ? patientById(alarm.patientId) : null;
+
+  const series = useMemo(() => {
+    if (typeof alarmTrendSeries === 'function') {
+      return alarmTrendSeries(alarm);
+    }
+    return [];
+  }, [alarm?.id]);
+
+  if (!p) return null;
+
+  const ward = (WARDS || []).find(w => w.id === p.wardId);
   const meta = PARAM_NAMES[alarm.param] || { full: alarm.param };
-  const series = useMemo(() => alarmTrendSeries(alarm), [alarm.id]);
   const r = RANGES[meta.vkey] || {};
   const up = alarm.dir === 'up';
 
@@ -63,7 +74,7 @@ export const AlarmDetailScreen = ({ alarm, onClose, onViewPatient, onWriteInstru
                     <Text style={[styles.severityText, { color: s.color }]}>{s.label}</Text>
                   </View>
                   <View style={styles.patientRow}>
-                    <Avatar initials={initials(p.name)} color={nameColor(p.name)} size={34} />
+                    <Avatar initials={typeof initials === 'function' ? initials(p.name) : ''} color={typeof nameColor === 'function' ? nameColor(p.name) : '#ccc'} size={34} />
                     <View>
                       <Text style={styles.patientName}>{p.name}</Text>
                       <Text style={styles.patientMeta}>{p.bed} · {ward?.name}</Text>
@@ -119,14 +130,14 @@ export const AlarmDetailScreen = ({ alarm, onClose, onViewPatient, onWriteInstru
               </View>
 
               <View style={styles.actions}>
-                <Btn full size="lg" icon={<IconCheck size={18} color="#fff" />} onClick={() => { showToast('Alarm acknowledged', 'good'); onAcknowledge(alarm); }}>
+                <Btn full size="lg" icon={<IconCheck size={18} color="#fff" />} onClick={() => { showToast?.('Alarm acknowledged', 'good'); onAcknowledge?.(alarm); }}>
                   Acknowledge
                 </Btn>
                 <View style={styles.actionRow}>
-                  <Btn variant="ghost" style={{ flex: 1 }} icon={<IconUser size={16} color={T.text} />} onClick={() => onViewPatient(p)}>
+                  <Btn variant="ghost" style={{ flex: 1 }} icon={<IconUser size={16} color={T.text} />} onClick={() => onViewPatient?.(p)}>
                     Patient
                   </Btn>
-                  <Btn variant="ghost" style={{ flex: 1 }} icon={<IconEdit size={15} color={T.text} />} onClick={() => onWriteInstruction(p)}>
+                  <Btn variant="ghost" style={{ flex: 1 }} icon={<IconEdit size={15} color={T.text} />} onClick={() => onWriteInstruction?.(p)}>
                     Instruction
                   </Btn>
                 </View>

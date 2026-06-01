@@ -230,7 +230,7 @@ const TeamGroup = ({ title, people, role }) => (
     <View style={{ gap: 9 }}>
       {people.map(name => (
         <View key={name} style={styles.memberRow}>
-          <Avatar initials={initials(name)} color={nameColor(name)} size={32} />
+          <Avatar initials={typeof initials === 'function' ? initials(name) : ''} color={typeof nameColor === 'function' ? nameColor(name) : '#ccc'} size={32} />
           <View style={{ flex: 1 }}>
             <Text style={styles.memberName}>{name}</Text>
             <Text style={styles.memberRole}>{role}</Text>

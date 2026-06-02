@@ -16,7 +16,8 @@ import {
   patientById,
   REFERRALS_INCOMING_DATA 
 } from '../data/mockData';
-import { Avatar, BedChip, WardTypeChip } from '../components/Clinical';
+import { BedChip, WardTypeChip } from '../components/Clinical';
+import { Avatar } from '../components/Shared';
 import { 
   IconClose, 
   IconCheck, 

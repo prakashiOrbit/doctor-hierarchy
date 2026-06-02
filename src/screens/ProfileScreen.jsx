@@ -31,7 +31,7 @@ export const ProfileScreen = ({ onLogout, onNavigate }) => {
   const rows = [
     { icon: <IconBell size={18} />, label: 'Notifications', val: 'Critical only', route: 'notif-prefs' },
     { icon: <IconShield size={18} />, label: 'Two-factor auth', val: 'On', route: '2fa-settings' },
-    { icon: <IconActivity size={18} />, label: 'Default waveform', val: 'ECG II', route: null },
+    { icon: <IconActivity size={18} />, label: 'Default waveform', val: 'ECG II', route: 'waveform-settings' },
     { icon: <IconClock size={18} />, label: 'Shift', val: 'Day · 08:00–20:00', route: 'oncall' },
   ];
 

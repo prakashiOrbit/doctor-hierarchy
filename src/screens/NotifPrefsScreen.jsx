@@ -65,9 +65,8 @@ export const NotifPrefsScreen = ({ onBack }) => {
 
 const styles = StyleSheet.create({
   container: {
-    ...StyleSheet.absoluteFillObject,
+    flex: 1,
     backgroundColor: T.bg,
-    zIndex: 40,
   },
   header: {
     flexDirection: 'row',
@@ -78,12 +77,13 @@ const styles = StyleSheet.create({
     paddingBottom: 12,
     borderBottomWidth: 1,
     borderBottomColor: T.borderSoft,
+    backgroundColor: T.surface,
   },
   backBtn: {
     width: 34,
     height: 34,
     borderRadius: 10,
-    backgroundColor: T.surface,
+    backgroundColor: T.bg,
     alignItems: 'center',
     justifyContent: 'center',
   },

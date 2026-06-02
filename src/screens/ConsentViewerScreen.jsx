@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   ScrollView,
   Platform,
+  TextInput,
 } from 'react-native';
 import { T } from '../theme/tokens';
 import { 
@@ -16,12 +17,36 @@ import {
   IconFileDoc,
   IconSignature,
   IconDownload,
+  IconPlus,
+  IconClose,
+  IconChevron,
 } from '../components/Icons';
 
 export const ConsentViewerScreen = ({ patient, onBack }) => {
   const [selected, setSelected] = useState(null);
+  const [capturing, setCapturing] = useState(false);
+  const [captureStep, setCaptureStep] = useState(1);
+  const [newType, setNewType] = useState(null);
+  const [signName, setSignName] = useState('');
+  
   const consents = consentsForPatient(patient.id);
   const statusColor = { SIGNED: T.good, PENDING: T.warn, DECLINED: T.bad };
+
+  const CAPTURE_TEMPLATES = [
+    { id: 't1', type: 'ICU Admission Consent', text: 'Standard consent for ICU admission, treatment, and invasive monitoring.' },
+    { id: 't2', type: 'Procedure Consent', text: 'General consent for clinical procedures including central lines and arterial access.' },
+    { id: 't3', type: 'Blood Products', text: 'Consent for administration of blood and blood components.' },
+    { id: 't4', type: 'Surgery Consent', text: 'General surgical and anaesthesia consent form.' },
+  ];
+
+  const handleCapture = () => {
+    // In a real app, this would save to a database
+    setCapturing(false);
+    setCaptureStep(1);
+    setNewType(null);
+    setSignName('');
+    // For demo, we just close
+  };
 
   return (
     <View style={styles.container}>
@@ -33,14 +58,22 @@ export const ConsentViewerScreen = ({ patient, onBack }) => {
           <Text style={styles.headerTitle}>Consents & Forms</Text>
           <Text style={styles.headerSub}>{patient.name}</Text>
         </View>
+        <TouchableOpacity onPress={() => setCapturing(true)} style={styles.addBtn}>
+          <IconPlus size={18} color={T.accent} />
+        </TouchableOpacity>
       </View>
 
       <ScrollView style={{ flex: 1 }} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         {consents.length === 0 ? (
           <View style={styles.emptyState}>
-            <IconFileDoc size={50} color={T.textFaint} />
+            <View style={styles.emptyIconBox}>
+              <IconFileDoc size={42} color={T.textFaint} />
+            </View>
             <Text style={styles.emptyTitle}>No consent forms</Text>
-            <Text style={styles.emptySub}>Consent documents will appear here when captured.</Text>
+            <Text style={styles.emptySub}>Digital consent documents will appear here when captured for this patient.</Text>
+            <TouchableOpacity onPress={() => setCapturing(true)} style={styles.emptyAction}>
+              <Text style={styles.emptyActionText}>Capture New Consent</Text>
+            </TouchableOpacity>
           </View>
         ) : (
           consents.map(c => (
@@ -54,7 +87,7 @@ export const ConsentViewerScreen = ({ patient, onBack }) => {
               </View>
               <View style={{ flex: 1, minWidth: 0 }}>
                 <View style={styles.cardHeader}>
-                  <Text style={styles.consentType}>{c.type}</Text>
+                  <Text style={styles.consentType} numberOfLines={1}>{c.type}</Text>
                   <View style={[styles.statusBadge, { backgroundColor: (statusColor[c.status] || T.textDim) + '18' }]}>
                     <Text style={[styles.statusText, { color: statusColor[c.status] || T.textDim }]}>{c.status}</Text>
                   </View>
@@ -125,15 +158,101 @@ export const ConsentViewerScreen = ({ patient, onBack }) => {
           </View>
         </View>
       )}
+
+      {/* Capture Flow Overlay */}
+      {capturing && (
+        <View style={styles.overlay}>
+          <View style={[styles.detailSheet, { height: '88%' }]}>
+            <View style={styles.sheetHandle} />
+            <View style={styles.detailHeader}>
+              <View>
+                <Text style={styles.detailTitle}>{captureStep === 1 ? 'New Consent Form' : 'Sign Document'}</Text>
+                <Text style={styles.headerSub}>{captureStep === 1 ? 'Select template' : newType?.type}</Text>
+              </View>
+              <TouchableOpacity onPress={() => setCapturing(false)} style={styles.closeBtnSmall}>
+                <IconClose size={16} color={T.textDim} />
+              </TouchableOpacity>
+            </View>
+
+            {captureStep === 1 ? (
+              <ScrollView style={styles.detailBody}>
+                <Text style={styles.sectionLabel}>CHOOSE TEMPLATE</Text>
+                <View style={{ gap: 10, marginTop: 10 }}>
+                  {CAPTURE_TEMPLATES.map(t => (
+                    <TouchableOpacity 
+                      key={t.id} 
+                      onPress={() => { setNewType(t); setCaptureStep(2); }}
+                      style={styles.templateCard}
+                    >
+                      <View style={styles.templateIcon}>
+                        <IconPlus size={18} color={T.accent} />
+                      </View>
+                      <View style={{ flex: 1 }}>
+                        <Text style={styles.templateName}>{t.type}</Text>
+                        <Text style={styles.templateDesc}>{t.text}</Text>
+                      </View>
+                      <IconChevron size={14} color={T.textFaint} />
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              </ScrollView>
+            ) : (
+              <View style={[styles.detailBody, { flex: 1 }]}>
+                <ScrollView showsVerticalScrollIndicator={false}>
+                  <View style={styles.formPreview}>
+                    <Text style={styles.formPreviewTitle}>{newType?.type}</Text>
+                    <Text style={styles.formPreviewText}>
+                      I, the undersigned, hereby consent to the clinical management as described. 
+                      I have been informed of the risks, benefits, and alternatives...
+                    </Text>
+                    <View style={styles.formPreviewDivider} />
+                    <Text style={styles.formPreviewText}>
+                      Patient: {patient.name}{"\n"}
+                      MRN: {patient.mrn}{"\n"}
+                      Ward: {patient.wardId.toUpperCase()}
+                    </Text>
+                  </View>
+
+                  <View style={styles.signatureInputSection}>
+                    <Text style={styles.inputLabel}>SIGNED BY (NAME)</Text>
+                    <TextInput 
+                      value={signName}
+                      onChangeText={setSignName}
+                      placeholder="Enter full name..."
+                      style={styles.signatureInput}
+                    />
+                    <View style={styles.drawingArea}>
+                      <IconSignature size={30} color={T.textFaint} />
+                      <Text style={styles.drawingText}>Sign here on device</Text>
+                    </View>
+                  </View>
+                </ScrollView>
+                
+                <View style={styles.captureActions}>
+                  <TouchableOpacity style={styles.cancelBtn} onPress={() => setCaptureStep(1)}>
+                    <Text style={styles.cancelBtnText}>Back</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity 
+                    style={[styles.confirmBtn, !signName && { opacity: 0.5 }]} 
+                    disabled={!signName}
+                    onPress={handleCapture}
+                  >
+                    <Text style={styles.confirmBtnText}>Finalize & Sign</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            )}
+          </View>
+        </View>
+      )}
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    ...StyleSheet.absoluteFillObject,
+    flex: 1,
     backgroundColor: T.bg,
-    zIndex: 40,
   },
   header: {
     flexDirection: 'row',
@@ -150,6 +269,14 @@ const styles = StyleSheet.create({
     height: 34,
     borderRadius: 10,
     backgroundColor: T.surface,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  addBtn: {
+    width: 34,
+    height: 34,
+    borderRadius: 10,
+    backgroundColor: T.accent + '12',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -170,19 +297,42 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   emptyState: {
-    paddingTop: 54,
+    paddingTop: 64,
     alignItems: 'center',
-    gap: 10,
+    gap: 12,
+  },
+  emptyIconBox: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: T.surface2,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 8,
   },
   emptyTitle: {
-    fontSize: 15,
-    fontWeight: '600',
-    color: T.textDim,
+    fontSize: 16,
+    fontWeight: '700',
+    color: T.text,
   },
   emptySub: {
-    fontSize: 12.5,
-    color: T.textFaint,
+    fontSize: 13,
+    color: T.textDim,
     textAlign: 'center',
+    paddingHorizontal: 40,
+    lineHeight: 19,
+  },
+  emptyAction: {
+    marginTop: 20,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    backgroundColor: T.accent,
+    borderRadius: 10,
+  },
+  emptyActionText: {
+    color: '#fff',
+    fontSize: 13.5,
+    fontWeight: '600',
   },
   consentCard: {
     flexDirection: 'row',
@@ -234,6 +384,7 @@ const styles = StyleSheet.create({
     ...StyleSheet.absoluteFillObject,
     backgroundColor: 'rgba(0,0,0,0.56)',
     zIndex: 50,
+    justifyContent: 'flex-end',
   },
   detailSheet: {
     height: '78%',
@@ -265,6 +416,14 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: T.text,
     lineHeight: 20,
+  },
+  closeBtnSmall: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: T.surface2,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   detailBody: {
     padding: 18,
@@ -343,4 +502,131 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: T.text,
   },
+  sectionLabel: {
+    fontSize: 10,
+    fontWeight: '700',
+    letterSpacing: 1,
+    color: T.textFaint,
+    marginBottom: 8,
+  },
+  templateCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    padding: 12,
+    backgroundColor: T.surface,
+    borderWidth: 1,
+    borderColor: T.borderSoft,
+    borderRadius: 12,
+  },
+  templateIcon: {
+    width: 36,
+    height: 36,
+    borderRadius: 8,
+    backgroundColor: T.accent + '10',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  templateName: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: T.text,
+  },
+  templateDesc: {
+    fontSize: 11,
+    color: T.textFaint,
+    marginTop: 2,
+  },
+  formPreview: {
+    backgroundColor: T.surface,
+    padding: 16,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: T.border,
+    marginBottom: 16,
+  },
+  formPreviewTitle: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: T.text,
+    marginBottom: 8,
+  },
+  formPreviewText: {
+    fontSize: 12,
+    color: T.textDim,
+    lineHeight: 18,
+  },
+  formPreviewDivider: {
+    height: 1,
+    backgroundColor: T.borderSoft,
+    marginVertical: 10,
+  },
+  signatureInputSection: {
+    gap: 8,
+  },
+  inputLabel: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: T.textFaint,
+  },
+  signatureInput: {
+    height: 44,
+    backgroundColor: T.surface,
+    borderWidth: 1,
+    borderColor: T.border,
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    fontSize: 14,
+    color: T.text,
+  },
+  drawingArea: {
+    height: 120,
+    backgroundColor: T.surface,
+    borderWidth: 1,
+    borderColor: T.border,
+    borderStyle: 'dashed',
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    marginTop: 8,
+  },
+  drawingText: {
+    fontSize: 12,
+    color: T.textFaint,
+  },
+  captureActions: {
+    flexDirection: 'row',
+    gap: 10,
+    marginTop: 20,
+    paddingBottom: 20,
+  },
+  cancelBtn: {
+    flex: 1,
+    height: 48,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: T.border,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  cancelBtnText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: T.textDim,
+  },
+  confirmBtn: {
+    flex: 2,
+    height: 48,
+    borderRadius: 12,
+    backgroundColor: T.accent,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  confirmBtnText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#fff',
+  },
 });
+

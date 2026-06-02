@@ -225,13 +225,19 @@ export const ALARM_TREND = buildTrend();
 export const NOTIFICATIONS_DATA = [
   { id: 'n1', type: 'alarm',     title: 'Critical: SpO₂ low',          body: 'Eleanor Whitfield · BED-12 · SpO₂ 88% — immediate review required.', ts: '09:14', day: 'today',     read: false },
   { id: 'n2', type: 'escalation',title: 'Nurse escalation',             body: 'Priya Nair flagged Marcus Doyle — sudden deterioration in level of consciousness.', ts: '08:45', day: 'today', read: false },
+  { id: 'n10', type: 'alarm',    title: 'High: Tachycardia',           body: 'Hiroshi Tanaka · BED-05 · HR 124 bpm — persistent for 10 mins.', ts: '10:30', day: 'today', read: false },
   { id: 'n3', type: 'ack',       title: 'Instruction acknowledged',     body: 'Tom Hale confirmed: Titrate FiO₂ instruction for Eleanor Whitfield.', ts: '07:32', day: 'today',     read: true  },
-  { id: 'n4', type: 'alarm',     title: 'HIGH: HR resolved',            body: 'Sofia Marchetti · BED-03 · HR returned to within normal range.',     ts: '06:10', day: 'today',     read: true  },
+  { id: 'n4', type: 'alarm',     title: 'High: HR resolved',            body: 'Sofia Marchetti · BED-03 · HR returned to within normal range.',     ts: '06:10', day: 'today',     read: true  },
+  { id: 'n11', type: 'system',   title: 'Lab results available',        body: 'New ABG results for Eleanor Whitfield (MRN-48213) are now ready for review.', ts: '05:45', day: 'today', read: false },
   { id: 'n5', type: 'system',    title: 'Shift handover reminder',      body: 'Your day shift ends at 20:00. Please complete round notes before handover.', ts: '18:00', day: 'yesterday', read: true },
-  { id: 'n6', type: 'alarm',     title: 'MEDIUM: Pyrexia',              body: 'Marcus Doyle · BED-08 · Temp 37.9 °C — monitor and reassess.',       ts: '14:22', day: 'yesterday', read: true  },
+  { id: 'n6', type: 'alarm',     title: 'Medium: Pyrexia',              body: 'Marcus Doyle · BED-08 · Temp 37.9 °C — monitor and reassess.',       ts: '14:22', day: 'yesterday', read: true  },
+  { id: 'n12', type: 'escalation',title: 'Urgent Referral',              body: 'Cardiology team accepted referral for Sofia Marchetti. Review in 30m.', ts: '11:15', day: 'yesterday', read: true },
+  { id: 'n14', type: 'system',   title: 'Maintenance notice',           body: 'System backup scheduled for 02:00 AM. Live monitoring will remain active.', ts: '09:00', day: 'yesterday', read: true },
   { id: 'n7', type: 'ack',       title: 'Instruction completed',        body: 'Daniel Ross confirmed: Step-down antibiotics completed — Amara Okafor.', ts: '10:05', day: 'yesterday', read: true },
   { id: 'n8', type: 'system',    title: 'New protocol update',          body: 'ICU Sepsis Bundle v3.2 published. Review required before next shift.', ts: '29 May', day: 'earlier',   read: true  },
   { id: 'n9', type: 'escalation',title: 'Nurse escalation',             body: 'Grace Lin escalated Hiroshi Tanaka — chest pain, requesting urgent review.', ts: '28 May', day: 'earlier', read: true },
+  { id: 'n13', type: 'ack',      title: 'Consent signed',               body: 'ICU Admission Consent signed digitally by NOK for Eleanor Whitfield.', ts: '27 May', day: 'earlier', read: true },
+  { id: 'n15', type: 'alarm',    title: 'Critical: NIBP High',          body: 'Eleanor Whitfield · BED-12 · NIBP 182/104 mmHg — escalating to attending.', ts: '26 May', day: 'earlier', read: true },
 ];
 
 export const NOTIF_TYPE_META = {

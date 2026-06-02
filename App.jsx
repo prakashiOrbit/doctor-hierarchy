@@ -17,6 +17,7 @@ import { OnCallScreen } from './src/screens/OnCallScreen';
 import { WardRoundsScreen } from './src/screens/WardRoundsScreen';
 import { ReferralScreen } from './src/screens/ReferralScreen';
 import { ConsentViewerScreen } from './src/screens/ConsentViewerScreen';
+import { WaveformSettingsScreen } from './src/screens/WaveformSettingsScreen';
 import { NotifPrefsScreen } from './src/screens/NotifPrefsScreen';
 import { TwoFASettingsScreen } from './src/screens/TwoFASettingsScreen';
 import { PatientDetailScreen } from './src/screens/PatientDetailScreen';
@@ -200,6 +201,10 @@ function MainApp({ onLogoutPhase, showToast }) {
             patient={top.data.patient} 
             onBack={pop} 
           />
+        );
+      case 'waveform-settings':
+        return (
+          <WaveformSettingsScreen onBack={pop} />
         );
       case 'notif-prefs':
         return (

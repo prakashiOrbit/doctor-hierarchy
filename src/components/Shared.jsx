@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 import Svg, { Path, Defs, LinearGradient, Stop, Circle, Rect } from 'react-native-svg';
 import { T } from '../theme/tokens';
-import { IconAlert, IconCheck, IconBack, IconSearch, IconX, IconChevron } from './Icons';
+import { IconAlert, IconCheck, IconBack, IconSearch, IconX, IconChevron, IconInfoCircle } from './Icons';
 
 export const Field = ({ label, hint, error, children, optional, mono }) => (
   <View style={styles.fieldContainer}>
@@ -248,14 +248,14 @@ export const PasswordStrengthBar = ({ password }) => {
 };
 
 export const Toast = ({ message, kind = 'info' }) => {
-  const [fade] = React.useState(new Animated.Value(0));
+  const [anim] = React.useState(new Animated.Value(0));
 
   React.useEffect(() => {
     if (message) {
       Animated.sequence([
-        Animated.timing(fade, { toValue: 1, duration: 200, useNativeDriver: true }),
-        Animated.delay(2000),
-        Animated.timing(fade, { toValue: 0, duration: 200, useNativeDriver: true }),
+        Animated.spring(anim, { toValue: 1, useNativeDriver: true, tension: 80, friction: 10 }),
+        Animated.delay(2600),
+        Animated.timing(anim, { toValue: 0, duration: 250, useNativeDriver: true }),
       ]).start();
     }
   }, [message]);
@@ -263,18 +263,39 @@ export const Toast = ({ message, kind = 'info' }) => {
   if (!message) return null;
 
   const map = {
-    info:  { bg: T.surface2,  color: T.text,   icon: <IconCheck size={16} /> },
-    good:  { bg: T.goodSoft,  color: T.good,   icon: <IconCheck size={16} /> },
-    bad:   { bg: T.badSoft,   color: T.bad,    icon: <IconAlert size={16} /> },
+    info:  { color: T.accent, bg: '#fff', icon: <IconInfoCircle size={18} /> },
+    good:  { color: T.good,   bg: '#fff', icon: <IconCheck size={18} /> },
+    bad:   { color: T.bad,    bg: '#fff', icon: <IconAlert size={18} /> },
   }[kind];
 
+  const translateY = anim.interpolate({
+    inputRange: [0, 1],
+    outputRange: [-60, 0],
+  });
+
   return (
-    <Animated.View style={[styles.toastContainer, { backgroundColor: map.bg, borderColor: T.border, opacity: fade }]}>
-      {React.cloneElement(map.icon, { color: map.color })}
-      <Text style={[styles.toastText, { color: map.color }]}>{message}</Text>
+    <Animated.View 
+      style={[
+        styles.toastWrapper, 
+        { 
+          opacity: anim,
+          transform: [{ translateY }]
+        }
+      ]}
+    >
+      <View style={[styles.toastContent, { backgroundColor: map.bg }]}>
+        <View style={[styles.toastAccent, { backgroundColor: map.color }]} />
+        <View style={styles.toastInner}>
+          <View style={[styles.toastIconBox, { backgroundColor: map.color + '12' }]}>
+            {React.cloneElement(map.icon, { color: map.color })}
+          </View>
+          <Text style={styles.toastText}>{message}</Text>
+        </View>
+      </View>
     </Animated.View>
   );
 };
+
 
 export const TopBar = ({ title, subtitle, leading, trailing, onBack, onLeadingClick }) => {
   const handleClick = onBack || onLeadingClick;
@@ -528,8 +549,54 @@ const styles = StyleSheet.create({
   strengthBars: { flexDirection: 'row', gap: 5 },
   strengthBar: { flex: 1, height: 4, borderRadius: 2 },
   strengthLabel: { fontSize: 11, fontWeight: '500' },
-  toastContainer: { position: 'absolute', left: 16, right: 16, bottom: 88, borderWidth: 1, borderRadius: 12, padding: 14, flexDirection: 'row', alignItems: 'center', gap: 10, elevation: 8, shadowColor: '#000', shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.4, shadowRadius: 24 },
-  toastText: { fontSize: 13, fontWeight: '500' },
+  toastWrapper: {
+    position: 'absolute',
+    top: Platform.OS === 'ios' ? 54 : 32,
+    left: 16,
+    right: 16,
+    zIndex: 9999,
+    alignItems: 'center',
+  },
+  toastContent: {
+    width: '100%',
+    maxWidth: 400,
+    borderRadius: 14,
+    overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.15,
+    shadowRadius: 20,
+    elevation: 10,
+    borderWidth: 1,
+    borderColor: 'rgba(0,0,0,0.05)',
+  },
+  toastAccent: {
+    position: 'absolute',
+    left: 0,
+    top: 0,
+    bottom: 0,
+    width: 4,
+  },
+  toastInner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+    gap: 12,
+  },
+  toastIconBox: {
+    width: 32,
+    height: 32,
+    borderRadius: 9,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  toastText: {
+    flex: 1,
+    fontSize: 13.5,
+    fontWeight: '600',
+    color: T.text,
+  },
   topBar: { height: 56, flexDirection: 'row', alignItems: 'center', paddingHorizontal: 14, borderBottomWidth: 1, borderBottomColor: T.borderSoft, backgroundColor: T.bg },
   topBarLeft: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   topBarAction: { width: 36, height: 36, borderRadius: 10, backgroundColor: T.surface, alignItems: 'center', justifyContent: 'center' },

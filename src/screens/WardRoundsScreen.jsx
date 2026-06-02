@@ -16,7 +16,8 @@ import {
   initials, 
   nameColor 
 } from '../data/mockData';
-import { Avatar, BedChip, WardTypeChip } from '../components/Clinical';
+import { BedChip, WardTypeChip } from '../components/Clinical';
+import { Avatar } from '../components/Shared';
 import { 
   IconBack, 
   IconCheck, 
